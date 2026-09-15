@@ -13,7 +13,7 @@ agentfence doctor --json
 
 Scanning is read-only except `--output`, which creates a new JSON file and never overwrites an existing destination. On POSIX, that file is created with mode 0600. On Windows, confidentiality depends on inherited ACLs: choose a parent directory whose ACL is appropriately restricted. Findings use opaque source identifiers and omit secrets, URLs, commands, and paths. The score summarizes observed configuration risk, not runtime access or security certification. Exit 0 means complete below threshold; 1 threshold exceeded; 2 usage/fatal/output failure; 3 partial coverage; 130 interruption.
 
-Node 24 is required (`>=24 <25`). This local v0.1 package is not published.
+Node 24 is required (`>=24 <25`). Official v0.1.0 artifacts are distributed through GitHub Releases; the package is not published to npm.
 
 `scan [PATH]` defaults to the current project and supported project candidates only.
 `--user-configs` is explicit opt-in and reads a fixed allowlist; it never crawls a

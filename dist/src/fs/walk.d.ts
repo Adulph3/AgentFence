@@ -14,5 +14,7 @@ export interface WalkOptions {
     readonly lstat?: typeof lstat;
 }
 export declare const sameDevice: (rootDevice: number, entryDevice: number) => boolean;
+/** Registry paths are portable `/`-separated identifiers, not host paths. */
+export declare const portableRelativePath: (path: string, separator?: string) => string;
 /** Bounded, sequential traversal. Once halted, every ancestor returns without more I/O. */
 export declare function walk(root: string, options?: WalkOptions): Promise<WalkResult>;

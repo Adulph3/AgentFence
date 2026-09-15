@@ -1,11 +1,13 @@
 import { opendir, lstat } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { join, relative, sep } from 'node:path';
 import { matchCandidate } from '../discovery/registry.js';
 import { LIMITS } from '../application/budget.js';
 const configTrees = new Set(['.codex', '.claude', '.cursor', '.kiro', '.vscode']);
 const ignored = new Set(['.git', 'node_modules', 'dist', 'build', 'coverage', '.cache', '.next', '.nuxt', '.turbo', '.venv', 'venv', '__pycache__', 'vendor', 'target']);
 const metadataConcurrency = Math.min(4, LIMITS.readConcurrency);
 export const sameDevice = (rootDevice, entryDevice) => rootDevice === entryDevice;
+/** Registry paths are portable `/`-separated identifiers, not host paths. */
+export const portableRelativePath = (path, separator = sep) => separator === '\\' ? path.replaceAll('\\', '/') : path;
 const securityRelevantLink = (relativePath) => matchCandidate(relativePath) !== undefined || relativePath.split(/[\\/]/).some(part => configTrees.has(part));
 /** Bounded, sequential traversal. Once halted, every ancestor returns without more I/O. */
 export async function walk(root, options = {}) {
@@ -100,7 +102,7 @@ export async function walk(root, options = {}) {
                 skip('excluded');
                 continue;
             }
-            const full = join(dir, entry.name), relativePath = relative(root, full), stat = stats[index];
+            const full = join(dir, entry.name), relativePath = portableRelativePath(relative(root, full)), stat = stats[index];
             if (unreadable.has(index) || !stat) {
                 limited = true;
                 skip('unreadable-entry');

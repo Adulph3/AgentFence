@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { scanProject } from '../../dist/src/node/index.js';
@@ -13,10 +13,11 @@ test('user .claude.json selects only top-level and exact canonical project MCP r
   const unrelatedValue='UNRELATED_LITERAL_CREDENTIAL_CANARY';
   try{
     await mkdir(join(home,'.claude'),{recursive:true});
+    const canonicalProject=await realpath(project);
     await writeFile(join(home,'.claude.json'),JSON.stringify({
       mcpServers:{top:{command:'top-server'}},
       projects:{
-        [project]:{mcpServers:{matching:{command:'matching-server',env:{OPENAI_API_KEY:'MATCHING_LITERAL_CREDENTIAL'}}}},
+        [canonicalProject]:{mcpServers:{matching:{command:'matching-server',env:{OPENAI_API_KEY:'MATCHING_LITERAL_CREDENTIAL'}}}},
         [unrelatedKey]:{mcpServers:{unrelated:{command:'unrelated-server',env:{OPENAI_API_KEY:unrelatedValue}}}}
       },
       oauthAccount:{token:'AUTH_HISTORY_CANARY'}

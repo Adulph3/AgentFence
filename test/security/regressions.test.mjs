@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, symlink, writeFile, link, rm } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { checkedRead } from '../../dist/src/fs/read.js';
+import { checkedRoot } from '../../dist/src/fs/root.js';
+import { analyzeCommand } from '../../dist/src/analysis/shell.js';
+import { escapeTerminal } from '../../dist/src/security/safe.js';
+import { scanError } from '../../dist/src/security/errors.js';
+import { ParserPool } from '../../dist/src/parsers/pool.js';
+test('no scope escape rejects traversal, link, hard link, UNC and ADS lexical forms',async()=>{const root=await mkdtemp(join(tmpdir(),'agentfence-scope-'));try{await writeFile(join(root,'a'),'x');await link(join(root,'a'),join(root,'b'));await symlink(join(root,'a'),join(root,'l'));await assert.rejects(checkedRead(root,'../a'));await assert.rejects(checkedRead(root,'b'));await assert.rejects(checkedRead(root,'l'));await assert.rejects(checkedRoot('\\\\server\\share'));await assert.rejects(checkedRoot('C:\\x:stream'));}finally{await rm(root,{recursive:true,force:true});}});
+test('checked reads reject a symlinked ancestor before opening its target',async()=>{const root=await mkdtemp(join(tmpdir(),'agentfence-scope-')),outside=await mkdtemp(join(tmpdir(),'agentfence-outside-'));try{await mkdir(join(outside,'rules'));await writeFile(join(outside,'rules','escaped.md'),'OUTSIDE_READ_CANARY');await symlink(outside,join(root,'.claude'));await assert.rejects(checkedRead(root,'.claude/rules/escaped.md'),/AF_LINK_INPUT/);}finally{await rm(root,{recursive:true,force:true});await rm(outside,{recursive:true,force:true});}});
+test('terminal escaping neutralizes control and bidi variants',()=>{const raw='\u001b]52;X\u0007\u009b31m\r\t\n\u202e\ud800';const out=escapeTerminal(raw);assert.equal(/[\u0000-\u001f\u007f-\u009f\u202a-\u202e]/.test(out),false);assert.ok(out.includes('\\u001B'));});
+test('safe errors retain only a normalized code and optional opaque source ID',()=>{const withSource=scanError('AF_BAD!raw','read','partial','S7');const withoutSource=scanError('AF_OK','report','fatal');assert.equal(withSource.message,'Scanner recorded AF_BAD');assert.equal(withSource.sourceId,'S7');assert.equal('sourceId'in withoutSource,false);assert.equal(withoutSource.message,'Scanner recorded AF_OK');});
+test('bounded shell work returns controlled unsupported result',()=>{assert.equal(analyzeCommand('x'.repeat(8193)).unsupported,true);assert.equal(analyzeCommand('$('.repeat(17)).unsupported,true);});
+test('parser rejects duplicate prototype deep and malformed input',async()=>{const p=new ParserPool();try{await assert.rejects(p.parse('json','{"x":1,"x":2}'));await assert.rejects(p.parse('json','{"constructor":1}'));await assert.rejects(p.parse('json','['.repeat(65)+'0'+']'.repeat(65)));await assert.rejects(p.parse('json','---\n!tag x'));}finally{await p.close();}});

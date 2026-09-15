@@ -1,0 +1,35 @@
+{
+  "name": "agentfence",
+  "version": "0.1.0",
+  "description": "Offline static configuration exposure audit for local AI agents",
+  "license": "MIT",
+  "type": "module",
+  "private": true,
+  "engines": { "node": ">=24 <25" },
+  "bin": { "agentfence": "./dist/src/cli/main.js" },
+  "exports": {
+    ".": "./dist/src/core/public.js",
+    "./core": { "types": "./dist/src/core/public.d.ts", "default": "./dist/src/core/public.js" },
+    "./node": { "types": "./dist/src/node/index.d.ts", "default": "./dist/src/node/index.js" }
+  },
+  "files": ["dist", "schemas", "README.md", "LICENSE", "SECURITY.md", "THIRD_PARTY_NOTICES.md"],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node scripts/check-catalog-tests.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build && node --test test/**/*.test.mjs",
+    "test:coverage": "npm run build && node --experimental-test-coverage --test-coverage-include='dist/src/scoring/**' --test-coverage-include='dist/src/security/**' --test-coverage-branches=90 --test test/**/*.test.mjs",
+    "lint": "npm run check:boundaries && npm run check:package",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "check:package": "node scripts/check-package.mjs",
+    "benchmark": "node scripts/benchmark.mjs"
+  },
+  "dependencies": {
+    "@iarna/toml": "2.2.5",
+    "jsonc-parser": "3.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.6.0",
+    "ajv": "8.17.1",
+    "typescript": "5.9.2"
+  }
+}

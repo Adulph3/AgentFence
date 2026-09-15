@@ -1,0 +1,3 @@
+[mcp_servers.user]
+command = "reviewed-tool"
+env_vars = ["OPENAI_API_KEY"]

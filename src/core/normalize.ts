@@ -1,0 +1,2 @@
+import type { Finding } from './types.js';
+export function normalizeFindings(findings: readonly Finding[]): Finding[] { const m = new Map<string, Finding>(); for (const f of findings) if (!m.has(f.id)) m.set(f.id, f); const rank = { critical:4, high:3, medium:2, low:1, info:0 }; return [...m.values()].sort((a,b) => rank[b.severity]-rank[a.severity] || a.location.sourceId.localeCompare(b.location.sourceId) || a.ruleId.localeCompare(b.ruleId) || (a.principalId??'').localeCompare(b.principalId??'') || a.id.localeCompare(b.id)); }

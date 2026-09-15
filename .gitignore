@@ -1,0 +1,28 @@
+# Dependencies and package-manager state
+node_modules/
+.npm/
+
+# Generated validation artifacts
+coverage/
+.nyc_output/
+*.tgz
+*.log
+*.tmp
+*.swp
+agentfence-report*.json
+
+# Local caches and build scratch directories
+.cache/
+build/
+.turbo/
+
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+
+# Editor and operating-system metadata
+.DS_Store
+Thumbs.db
+.idea/
+*.code-workspace

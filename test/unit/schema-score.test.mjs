@@ -1,0 +1,17 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import Ajv2020 from 'ajv/dist/2020.js';
+import reportSchema from '../../schemas/report-1.0.schema.json' with {type:'json'};
+import doctorSchema from '../../schemas/doctor-1.0.schema.json' with {type:'json'};
+import failureSchema from '../../schemas/failure-1.0.schema.json' with {type:'json'};
+import { scanProject } from '../../dist/src/node/index.js';
+import { doctor } from '../../dist/src/cli/doctor.js';
+import { jsonFailure } from '../../dist/src/reporters/json.js';
+import { scoreFindings } from '../../dist/src/core/index.js';
+const ajv=new Ajv2020({strict:true}); const validateReport=ajv.compile(reportSchema),validateDoctor=ajv.compile(doctorSchema),validateFailure=ajv.compile(failureSchema);
+test('complete report validates strict schema',async()=>{const r=await scanProject({path:'test/fixtures/clean'});assert.equal(validateReport(r),true,JSON.stringify(validateReport.errors));});
+test('partial failure-shaped report validates strict report schema',async()=>{const r=await scanProject({path:'test/fixtures/risky'});r.errors;assert.equal(validateReport(r),true,JSON.stringify(validateReport.errors));});
+test('report schema rejects unknown and missing nested properties',async()=>{const r=await scanProject({path:'test/fixtures/clean'});assert.equal(validateReport({...r,extra:true}),false);const bad={...r,coverage:{...r.coverage,extra:true}};assert.equal(validateReport(bad),false);const {status,...missing}=r;assert.equal(validateReport(missing),false);});
+test('doctor schema validates and rejects extras',()=>{const d=JSON.parse(doctor(true));assert.equal(validateDoctor(d),true);assert.equal(validateDoctor({...d,extra:true}),false);});
+test('failure envelope is strict and secret-free',()=>{const f=JSON.parse(jsonFailure('AF_ROOT_INVALID'));assert.equal(validateFailure(f),true);assert.equal(validateFailure({...f,score:0}),false);});
+test('score is monotonic and duplicate idempotent',()=>{const base={id:'0123456789abcdef',ruleId:'AF-X-001',ruleVersion:'1.0.0',title:'x',severity:'high',category:'shell',description:'x',evidence:{kind:'field',summary:'x',factIds:['F-0123456789abcdef']},location:{sourceId:'S1',scope:'project',displayPath:'source-1'},relatedLocations:[],recommendation:'x',confidence:'high',applicability:'potential',agentIds:[],riskKey:'shell:AF-X-001:S1:0',references:[],relatedFindingIds:[]};const one=scoreFindings([base],1),two=scoreFindings([base,base],1),strong=scoreFindings([base,{...base,id:'fedcba9876543210',severity:'critical',riskKey:'shell:AF-X-002:S1:0'}],1);assert.equal(one.value,two.value);assert.ok(strong.value<=one.value);assert.equal(scoreFindings([],0).value,null);});

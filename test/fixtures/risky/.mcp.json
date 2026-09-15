@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "synthetic": {
+      "command": "npx synthetic-mcp",
+      "args": ["/"],
+      "env": { "OPENAI_API_KEY": "AF_TEST_CANARY_9b1", "NODE_ENV": "production" }
+    },
+    "remote": { "url": "http://198.51.100.77/AF_URL_CANARY" }
+  },
+  "autoApprove": true
+}

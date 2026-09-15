@@ -1,0 +1,836 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "safe": {
+      "type": "string",
+      "maxLength": 480,
+      "pattern": "^[\\x20-\\x7e]*$"
+    },
+    "location": {
+      "type": "object",
+      "required": [
+        "sourceId",
+        "scope",
+        "displayPath"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "string",
+          "pattern": "^S[0-9]+$"
+        },
+        "scope": {
+          "enum": [
+            "project",
+            "user"
+          ]
+        },
+        "displayPath": {
+          "$ref": "#/$defs/safe"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "endLine": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "endColumn": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "field": {
+          "$ref": "#/$defs/safe"
+        }
+      },
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "object",
+      "required": [
+        "code",
+        "stage",
+        "message",
+        "effect",
+        "retryable"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^AF_[A-Z0-9_]+$"
+        },
+        "stage": {
+          "enum": [
+            "discovery",
+            "read",
+            "parse",
+            "analyze",
+            "report"
+          ]
+        },
+        "sourceId": {
+          "type": "string",
+          "pattern": "^S[0-9]+$"
+        },
+        "message": {
+          "$ref": "#/$defs/safe"
+        },
+        "effect": {
+          "enum": [
+            "partial",
+            "fatal"
+          ]
+        },
+        "retryable": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "engineVersion",
+    "rulesetVersion",
+    "kind",
+    "status",
+    "scope",
+    "coverage",
+    "sources",
+    "agents",
+    "mcpServers",
+    "capabilities",
+    "findings",
+    "errors",
+    "score",
+    "thresholdExceeded",
+    "presentation"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "engineVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "rulesetVersion": {
+      "const": "1.0.0"
+    },
+    "kind": {
+      "const": "scan"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "partial"
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "project",
+        "userConfigs",
+        "exclusions"
+      ],
+      "properties": {
+        "project": {
+          "const": "PROJECT"
+        },
+        "userConfigs": {
+          "type": "boolean"
+        },
+        "exclusions": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/safe"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "eligibleFiles",
+        "analyzedFiles",
+        "visitedEntries",
+        "skippedByReason",
+        "limitations"
+      ],
+      "properties": {
+        "eligibleFiles": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "analyzedFiles": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "visitedEntries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 50000
+        },
+        "skippedByReason": {
+          "type": "object",
+          "maxProperties": 256,
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "$ref": "#/$defs/safe"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "sources": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "location"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^S[0-9]+$"
+          },
+          "location": {
+            "$ref": "#/$defs/location"
+          },
+          "adapter": {
+            "enum": [
+              "codex",
+              "claude-code",
+              "cursor",
+              "kiro",
+              "vscode",
+              "generic-mcp"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "agents": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "detection",
+          "sources",
+          "adapterVersion",
+          "runtimeVersion",
+          "effectiveState"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^A-[a-z-]+-S[0-9]+$"
+          },
+          "kind": {
+            "enum": [
+              "codex",
+              "claude-code",
+              "cursor",
+              "kiro",
+              "vscode",
+              "generic-mcp"
+            ]
+          },
+          "detection": {
+            "enum": [
+              "confirmed-config",
+              "possible"
+            ]
+          },
+          "sources": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "type": "string",
+              "pattern": "^S[0-9]+$"
+            }
+          },
+          "adapterVersion": {
+            "const": "1.0.0"
+          },
+          "runtimeVersion": {
+            "const": "unknown"
+          },
+          "effectiveState": {
+            "const": "unverified"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "mcpServers": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "agentId",
+          "principalId",
+          "location",
+          "transport",
+          "enabled",
+          "launcher",
+          "packageSelector",
+          "envBindings",
+          "roots",
+          "capabilityIds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{16}$"
+          },
+          "agentId": {
+            "type": "string",
+            "pattern": "^A-[a-z-]+-S[0-9]+$"
+          },
+          "principalId": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9:_-]+$"
+          },
+          "location": {
+            "$ref": "#/$defs/location"
+          },
+          "transport": {
+            "enum": [
+              "stdio",
+              "http",
+              "sse",
+              "unknown"
+            ]
+          },
+          "enabled": {
+            "enum": [
+              "yes",
+              "no",
+              "unknown"
+            ]
+          },
+          "launcher": {
+            "enum": [
+              "direct",
+              "shell",
+              "package-runner",
+              "unknown"
+            ]
+          },
+          "packageSelector": {
+            "enum": [
+              "exact",
+              "mutable",
+              "absent",
+              "unresolved"
+            ]
+          },
+          "endpoint": {
+            "type": "object",
+            "required": [
+              "scheme",
+              "hostClass"
+            ],
+            "properties": {
+              "scheme": {
+                "enum": [
+                  "https",
+                  "http",
+                  "other"
+                ]
+              },
+              "hostClass": {
+                "enum": [
+                  "loopback-literal",
+                  "private-literal",
+                  "other",
+                  "unresolved"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "envBindings": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "type": "object",
+              "required": [
+                "name",
+                "mode"
+              ],
+              "properties": {
+                "name": {
+                  "$ref": "#/$defs/safe"
+                },
+                "mode": {
+                  "enum": [
+                    "literal",
+                    "reference",
+                    "unknown"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "roots": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "type": "object",
+              "required": [
+                "class"
+              ],
+              "properties": {
+                "class": {
+                  "enum": [
+                    "project",
+                    "home",
+                    "filesystem",
+                    "sensitive",
+                    "other",
+                    "unknown"
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "capabilityIds": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{16}$"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "principalId",
+          "kind",
+          "basis",
+          "confidence",
+          "applicability",
+          "sourceIds",
+          "constraints"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{16}$"
+          },
+          "principalId": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9:_-]+$"
+          },
+          "kind": {
+            "enum": [
+              "process-launch",
+              "shell",
+              "network",
+              "sensitive-env",
+              "filesystem-read",
+              "filesystem-write",
+              "approval-bypass"
+            ]
+          },
+          "basis": {
+            "enum": [
+              "explicit-config",
+              "recognized-command",
+              "text-request",
+              "inferred"
+            ]
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "applicability": {
+            "enum": [
+              "potential",
+              "inactive",
+              "unknown"
+            ]
+          },
+          "sourceIds": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "type": "string",
+              "pattern": "^S[0-9]+$"
+            }
+          },
+          "constraints": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "$ref": "#/$defs/safe"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "findings": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "ruleId",
+          "ruleVersion",
+          "title",
+          "severity",
+          "category",
+          "description",
+          "evidence",
+          "location",
+          "relatedLocations",
+          "recommendation",
+          "confidence",
+          "applicability",
+          "agentIds",
+          "riskKey",
+          "references",
+          "relatedFindingIds"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{16}$"
+          },
+          "ruleId": {
+            "type": "string",
+            "pattern": "^AF-[A-Z-]+-[0-9]{3}$"
+          },
+          "ruleVersion": {
+            "const": "1.0.0"
+          },
+          "title": {
+            "$ref": "#/$defs/safe"
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "category": {
+            "enum": [
+              "secrets",
+              "shell",
+              "filesystem",
+              "network",
+              "mcp",
+              "agent-config",
+              "supply-chain",
+              "unicode",
+              "permissions",
+              "prompt-security"
+            ]
+          },
+          "description": {
+            "$ref": "#/$defs/safe"
+          },
+          "evidence": {
+            "type": "object",
+            "required": [
+              "kind",
+              "summary",
+              "factIds"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "field",
+                  "token-pattern",
+                  "instruction-pattern",
+                  "unicode",
+                  "combination"
+                ]
+              },
+              "summary": {
+                "$ref": "#/$defs/safe"
+              },
+              "factIds": {
+                "type": "array",
+                "maxItems": 10000,
+                "items": {
+                  "type": "string",
+                  "pattern": "^F-[a-f0-9]{16}$"
+                }
+              },
+              "knownEnvNames": {
+                "type": "array",
+                "maxItems": 256,
+                "items": {
+                  "$ref": "#/$defs/safe"
+                }
+              },
+              "codePoints": {
+                "type": "array",
+                "maxItems": 256,
+                "items": {
+                  "$ref": "#/$defs/safe"
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "location": {
+            "$ref": "#/$defs/location"
+          },
+          "relatedLocations": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "$ref": "#/$defs/location"
+            }
+          },
+          "recommendation": {
+            "$ref": "#/$defs/safe"
+          },
+          "confidence": {
+            "enum": [
+              "high",
+              "medium",
+              "low"
+            ]
+          },
+          "applicability": {
+            "enum": [
+              "potential",
+              "inactive",
+              "unknown"
+            ]
+          },
+          "agentIds": {
+            "type": "array",
+            "maxItems": 256,
+            "items": {
+              "type": "string",
+              "pattern": "^A-[a-z-]+-S[0-9]+$"
+            }
+          },
+          "principalId": {
+            "type": "string",
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9:_-]+$"
+          },
+          "riskKey": {
+            "type": "string",
+            "maxLength": 240,
+            "pattern": "^[A-Za-z0-9:_-]+$"
+          },
+          "references": {
+            "type": "array",
+            "maxItems": 64,
+            "items": {
+              "type": "string",
+              "pattern": "^https://"
+            }
+          },
+          "relatedFindingIds": {
+            "type": "array",
+            "maxItems": 10000,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{16}$"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "errors": {
+      "type": "array",
+      "maxItems": 10000,
+      "items": {
+        "$ref": "#/$defs/error"
+      }
+    },
+    "score": {
+      "type": "object",
+      "required": [
+        "modelVersion",
+        "value",
+        "label",
+        "provisional",
+        "categories",
+        "groups",
+        "interpretation"
+      ],
+      "properties": {
+        "modelVersion": {
+          "const": "1.0.0"
+        },
+        "value": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "label": {
+          "enum": [
+            "not-assessed",
+            "few-observed",
+            "low",
+            "moderate",
+            "high",
+            "critical"
+          ]
+        },
+        "provisional": {
+          "type": "boolean"
+        },
+      "categories": {
+        "type": "array",
+        "maxItems": 10,
+        "items": {
+            "type": "object",
+            "required": [
+              "category",
+              "raw",
+              "cap",
+              "deducted"
+            ],
+            "properties": {
+              "category": {
+                "enum": [
+                  "secrets",
+                  "shell",
+                  "filesystem",
+                  "network",
+                  "mcp",
+                  "agent-config",
+                  "supply-chain",
+                  "unicode",
+                  "permissions",
+                  "prompt-security"
+                ]
+              },
+              "raw": {
+                "type": "number",
+                "minimum": 0
+              },
+              "cap": {
+                "type": "number",
+                "minimum": 0
+              },
+              "deducted": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+      "groups": {
+        "type": "array",
+        "maxItems": 10000,
+        "items": {
+            "type": "object",
+            "required": [
+              "riskKey",
+              "findingIds",
+              "deducted"
+            ],
+            "properties": {
+              "riskKey": {
+                "type": "string",
+                "maxLength": 240,
+                "pattern": "^[A-Za-z0-9:_-]+$"
+              },
+            "findingIds": {
+              "type": "array",
+              "maxItems": 10000,
+              "items": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{16}$"
+                }
+              },
+              "deducted": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "interpretation": {
+          "$ref": "#/$defs/safe"
+        }
+      },
+      "additionalProperties": false
+    },
+    "thresholdExceeded": {
+      "type": "boolean"
+    },
+    "presentation": {
+      "type": "object",
+      "required": [
+        "minimumSeverity"
+      ],
+      "properties": {
+        "minimumSeverity": {
+          "enum": [
+            "info",
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

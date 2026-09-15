@@ -17,7 +17,7 @@
     "build": "tsc -p tsconfig.build.json && node scripts/check-catalog-tests.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test test/**/*.test.mjs",
-    "test:coverage": "npm run build && node --experimental-test-coverage --test-coverage-include='dist/src/scoring/**' --test-coverage-include='dist/src/security/**' --test-coverage-branches=90 --test test/**/*.test.mjs",
+    "test:coverage": "npm run build && node --experimental-test-coverage --test-concurrency=1 --test-coverage-include=\"dist/src/scoring/**\" --test-coverage-include=\"dist/src/security/**\" --test-coverage-branches=90 --test test/**/*.test.mjs",
     "lint": "npm run check:boundaries && npm run check:package",
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "check:package": "node scripts/check-package.mjs",

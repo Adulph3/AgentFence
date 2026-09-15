@@ -1,8 +1,8 @@
 import { lstat, realpath } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { resolve, parse } from 'node:path';
+import { resolve, parse, relative } from 'node:path';
 export async function checkedRoot(input) { if (!input || input.includes('\0') || /^(?:\\\\|\\\.\\)/.test(input) || /^[A-Za-z]:.*:/.test(input))
-    throw new Error('AF_ROOT_REJECTED'); const root = resolve(input); const parts = root.split(/[\\/]+/).filter(Boolean); let current = parse(root).root; for (const part of parts) {
+    throw new Error('AF_ROOT_REJECTED'); const root = resolve(input), rootPath = parse(root).root, parts = relative(rootPath, root).split(/[\\/]+/).filter(Boolean); let current = rootPath; for (const part of parts) {
     current = resolve(current, part);
     const component = await lstat(current);
     if (component.isSymbolicLink())

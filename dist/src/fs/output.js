@@ -2,9 +2,14 @@ import { open, lstat, unlink } from 'node:fs/promises';
 import { dirname, join, parse, relative, resolve } from 'node:path';
 import { LIMITS } from '../application/budget.js';
 const missing = (error) => typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT';
-/** Reject Windows namespaces, UNC paths, and ADS/drive syntax lexically on every host. */
-function unsafeOutputPath(path) {
-    return path.includes('\0') || /^(?:\\\\|\/\/)/.test(path) || /^(?:\\\\[?.]|\/\/[?.])/.test(path) || /^[a-zA-Z]:/.test(path) || path.includes(':');
+/** Reject namespaces, UNC paths, drive-relative paths, and ADS syntax. */
+export function outputPathLexicallySafe(path, platform = process.platform) {
+    if (!path || path.includes('\0') || /^(?:\\\\|\/\/)/.test(path) || /^(?:\\\\[?.]|\/\/[?.])/.test(path))
+        return false;
+    const driveAbsolute = /^[a-zA-Z]:[\\/]/.test(path);
+    if (platform === 'win32' && driveAbsolute)
+        return !path.slice(2).includes(':');
+    return !/^[a-zA-Z]:/.test(path) && !path.includes(':');
 }
 async function checkedParent(destination) { if (destination === parse(destination).root)
     throw new Error('AF_OUTPUT_PATH'); const root = parse(destination).root, parent = dirname(destination), parts = relative(root, parent).split(/[\\/]/).filter(Boolean); let current = root; try {
@@ -43,7 +48,7 @@ catch { /* Cleanup is identity-bound and best-effort. */ } }
 export async function exclusiveWrite(path, data, options = {}) {
     if (options.signal?.aborted)
         throw new Error('AF_INTERRUPTED');
-    if (!path || unsafeOutputPath(path))
+    if (!outputPathLexicallySafe(path))
         throw new Error('AF_OUTPUT_PATH');
     if (Buffer.byteLength(data) > LIMITS.outputBytes)
         throw new Error('AF_OUTPUT_LIMIT');

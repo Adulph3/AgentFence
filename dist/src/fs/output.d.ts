@@ -1,5 +1,7 @@
 import { open } from 'node:fs/promises';
 type OutputHandle = Awaited<ReturnType<typeof open>>;
+/** Reject namespaces, UNC paths, drive-relative paths, and ADS syntax. */
+export declare function outputPathLexicallySafe(path: string, platform?: NodeJS.Platform): boolean;
 export interface ExclusiveWriteOptions {
     /** Test seam for a failed body write; production always uses FileHandle.writeFile. */
     readonly write?: (handle: OutputHandle, data: string) => Promise<void>;

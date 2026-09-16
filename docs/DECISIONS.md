@@ -13,3 +13,11 @@
 - D21: link, device, and output containment checks are best-effort portable Node
   defenses. They reject observed unsafe components but cannot make a concurrent
   mutation race impossible; that residual limit is documented rather than hidden.
+- D22: the requested v0.2.0 milestone is npm/npx distribution readiness and Node
+  22/24 compatibility only. The master plan's R2 explicit policy/scope-control
+  work is deferred; no detection or security invariant changes accompany this
+  package-version increment. npm publication remains a separately authorized act.
+- D23: the owner selected the public scoped npm package `@adulph3/agentfence`
+  for v0.2.0. The installed executable remains `agentfence`; the unrelated
+  unscoped registry package is outside this project's control. This naming
+  decision changes package identity and self-imports only, not detection behavior.

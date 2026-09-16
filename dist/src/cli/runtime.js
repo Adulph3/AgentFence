@@ -2,7 +2,7 @@ import { jsonFailure, jsonReport } from '../reporters/json.js';
 import { scanError } from '../security/errors.js';
 import { exclusiveWrite } from '../fs/output.js';
 /** Internal runtime/exit helpers: no CLI or environment bypass is exposed. */
-export const runtimeSupported = (version) => version.split('.')[0] === '24';
+export const runtimeSupported = (version) => /^(?:22|24)\.\d+\.\d+$/.test(version);
 export const reportExit = (report, interrupted = false) => report.errors.some(error => error.effect === 'fatal') ? 2 : interrupted ? 130 : report.status === 'partial' ? 3 : report.thresholdExceeded ? 1 : 0;
 /** Internal production destination service; it is not part of the package API. */
 export const destinationWriter = (path, writeDiagnostic) => {

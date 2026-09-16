@@ -7,11 +7,20 @@ import { validatePackageMetadata } from '../../scripts/check-package.mjs';
 
 const root=new URL('../..',import.meta.url);
 
-test('Batch 8 package metadata is MIT, locked, and retains the release allowlist',()=>{
-  assert.equal(pkg.private,true);
+test('public-ready package metadata is MIT, locked, and retains the release allowlist',()=>{
+  assert.notEqual(pkg.private,true);
+  assert.equal(pkg.name,'@adulph3/agentfence');
+  assert.equal(pkg.version,'0.2.0');
+  assert.equal(lock.name,pkg.name);
   assert.equal(pkg.license,'MIT');
   assert.equal(lock.packages[''].license,'MIT');
   assert.doesNotThrow(()=>validatePackageMetadata(pkg,lock));
+  assert.throws(()=>validatePackageMetadata({...pkg,name:'agentfence'},lock),/package name/);
+  assert.throws(()=>validatePackageMetadata(pkg,{...lock,name:'agentfence'}),/metadata disagree/);
+  assert.throws(()=>validatePackageMetadata({...pkg,bin:{agentfence2:'./dist/src/cli/main.js'}},lock),/CLI metadata/);
+  assert.throws(()=>validatePackageMetadata({...pkg,private:true},lock),/public state/);
+  assert.throws(()=>validatePackageMetadata({...pkg,engines:{node:'>=22'}},lock),/metadata disagree|runtime/);
+  assert.throws(()=>validatePackageMetadata({...pkg,publishConfig:{access:'restricted'}},lock),/public package metadata/);
   assert.throws(()=>validatePackageMetadata({...pkg,license:'Apache-2.0'},lock),/license/);
   assert.throws(()=>validatePackageMetadata(pkg,{...lock,packages:{...lock.packages,'':{...lock.packages[''],license:'Apache-2.0'}}}),/metadata disagree/);
   assert.throws(()=>validatePackageMetadata({...pkg,files:pkg.files.filter(file=>file!=='LICENSE')},lock),/allowlist/);

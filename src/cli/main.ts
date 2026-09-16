@@ -14,7 +14,7 @@ process.stdout.on('error',()=>{});process.stderr.on('error',()=>{});
 const argv=process.argv.slice(2);let parsed;try{parsed=parseArgs([...argv]);}catch{process.exitCode=await fail(argv.includes('--json'),'AF_USAGE',argv.includes('--output'));}
 if(parsed){
  if(parsed.command==='help'){try{await write(process.stdout,usage);}catch{process.exitCode=2;}}
- else if(parsed.command==='version'){try{await write(process.stdout,'0.1.0\n');}catch{process.exitCode=2;}}
+ else if(parsed.command==='version'){try{await write(process.stdout,'0.2.0\n');}catch{process.exitCode=2;}}
  else if(!runtimeSupported(process.versions.node))process.exitCode=await fail(parsed.json,'AF_RUNTIME_UNSUPPORTED',Boolean(parsed.output));
  else if(parsed.command==='doctor'){try{const result=runDoctor(parsed.json);await write(process.stdout,result.output);process.exitCode=result.exitCode;}catch{process.exitCode=2;}}
  else {

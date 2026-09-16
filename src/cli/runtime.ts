@@ -5,7 +5,7 @@ import { scanError } from '../security/errors.js';
 import { exclusiveWrite, type ExclusiveWriteReceipt } from '../fs/output.js';
 
 /** Internal runtime/exit helpers: no CLI or environment bypass is exposed. */
-export const runtimeSupported=(version:string):boolean=>version.split('.')[0]==='24';
+export const runtimeSupported=(version:string):boolean=>/^(?:22|24)\.\d+\.\d+$/.test(version);
 export const reportExit=(report:ScanReport,interrupted=false):number=>report.errors.some(error=>error.effect==='fatal')?2:interrupted?130:report.status==='partial'?3:report.thresholdExceeded?1:0;
 export interface ScanRunnerServices { readonly runtimeVersion:string; scan(request:ScanRequest,signal?:AbortSignal):Promise<ScanReport>; writeReport(text:string):Promise<void>; writeDiagnostic(text:string):Promise<void>; writeOutput?(text:string,signal?:AbortSignal):Promise<void>; /** Identity-bound destination rollback after a post-write observed interrupt. */ cleanupOutput?():Promise<void>; render?(report:ScanReport):string; }
 /** Internal production destination service; it is not part of the package API. */

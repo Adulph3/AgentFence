@@ -12,15 +12,15 @@
 <p align="center">
   <a href="https://github.com/Adulph3/AgentFence/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Adulph3/AgentFence/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/Adulph3/AgentFence/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Adulph3/AgentFence?sort=semver"></a>
-  <a href="https://nodejs.org/"><img alt="Node.js 24" src="https://img.shields.io/badge/Node.js-24.x-339933?logo=node.js&logoColor=white"></a>
+  <a href="https://nodejs.org/"><img alt="Node.js 22 and 24" src="https://img.shields.io/badge/Node.js-22.x%20%7C%2024.x-339933?logo=node.js&logoColor=white"></a>
   <a href="#installation"><img alt="Linux, macOS, and Windows" src="https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-2563EB"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-0F766E"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/Adulph3/AgentFence/releases/download/v0.1.0/agentfence-0.1.0.tgz"><strong>Download v0.1.0</strong></a>
+  <a href="#quick-start"><strong>Quick Start</strong></a>
   · <a href="#installation">Installation</a>
-  · <a href="#quick-start">Quick start</a>
+  · <a href="#usage-examples">Usage examples</a>
   · <a href="#security-model">Security</a>
 </p>
 
@@ -101,7 +101,28 @@ flowchart LR
 
 Raw source bytes still exist in process memory while being analyzed, and portable Node.js checks cannot prove containment against a concurrently hostile filesystem. For adversarial trees, scan an externally prepared immutable local snapshot. Read the complete [privacy model](docs/PRIVACY.md) and [threat model](docs/THREAT_MODEL.md).
 
+## Quick Start
+
+AgentFence v0.2.0 supports Node.js 22 and 24; Node.js 24 is recommended. Untested odd-numbered releases are not supported. Once the scoped package is published, use it for a one-off scan without a permanent installation:
+
+```bash
+npx @adulph3/agentfence scan
+npx @adulph3/agentfence scan --user-configs
+```
+
+The optional permanent installation keeps the executable name `agentfence`:
+
+```bash
+npm install -g @adulph3/agentfence
+agentfence scan
+agentfence scan --user-configs
+```
+
+For an explicit package selection, `npx --package=@adulph3/agentfence agentfence scan` is equivalent. Verify the scoped package's publication before using these registry-backed commands. The unrelated unscoped npm package `agentfence` is **not this project**. npm/npx installation may contact the registry; AgentFence's `scan` and `doctor` commands make no application-initiated network requests.
+
 ## Installation
+
+The platform-specific steps below remain available for the separately verified v0.1.0 GitHub artifact. For v0.2.0, use the scoped npm commands in [Quick Start](#quick-start) after confirming publication.
 
 AgentFence v0.1.0 requires **Node.js 24.x** (`>=24 <25`). It is distributed through GitHub Releases and is **not published to the npm registry**. The commands below install the downloaded local `.tgz` artifact.
 
@@ -227,7 +248,7 @@ SHA-256:
 
 On POSIX systems, `--output` creates a new report with mode `0600`. On Windows, report confidentiality depends on the inherited ACL of the selected parent directory, which the operator must restrict appropriately; mocked or lexical Windows tests do not establish real ACL behavior.
 
-## Quick start
+## Usage examples
 
 Run AgentFence from the project you want to inspect:
 
@@ -246,7 +267,6 @@ agentfence scan . --output report.json
 
 # Opt into the fixed allowlist of supported user configuration
 agentfence scan . --user-configs
-
 # Show High/Critical findings and fail when either is present
 agentfence scan . --severity high --fail-on high
 
@@ -310,7 +330,7 @@ agentfence scan . --json --fail-on high > agentfence-report.json
 
 Treat exit `1` as a configured policy threshold, exit `3` as incomplete coverage requiring review, and exit `2` as a scanner/runtime failure. Reports can contain sensitive configuration observations even though secret values and raw paths are omitted; handle them as security artifacts.
 
-The AgentFence repository's own workflow runs the complete quality-gate sequence on Ubuntu, macOS, and Windows with Node.js 24.21.0.
+The AgentFence repository's workflow is configured to run the complete quality-gate sequence on Ubuntu, macOS, and Windows with Node.js 22.23.2 and 24.21.0.
 
 ## How AgentFence works
 
@@ -340,7 +360,7 @@ Always verify the checksum before installing. The release artifact and its diges
 
 | Check | Status |
 | --- | --- |
-| Current release | v0.1.0 |
+| Previously verified GitHub release | v0.1.0 |
 | Ubuntu / Node.js 24 CI | Passed |
 | macOS / Node.js 24 CI | Passed |
 | Windows / Node.js 24 CI | Passed |
@@ -366,16 +386,17 @@ Version pinning reduces selector drift but does not prove package integrity. Ins
 
 ## Updating and uninstalling
 
-To update, download a newer `.tgz` from [GitHub Releases](https://github.com/Adulph3/AgentFence/releases), verify its published checksum, and install the local file:
+For the scoped npm package, update or uninstall with:
+
+```bash
+npm install -g @adulph3/agentfence@latest
+npm uninstall -g @adulph3/agentfence
+```
+
+For a GitHub Release artifact, download its `.tgz`, verify the published checksum, and install the local file:
 
 ```bash
 npm install -g ./agentfence-VERSION.tgz
-```
-
-To remove AgentFence:
-
-```bash
-npm uninstall -g agentfence
 ```
 
 ## Security reporting

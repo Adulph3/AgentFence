@@ -7,6 +7,8 @@ const calls=[]; const mark=name=>function(){calls.push(name);throw new Error('fo
 for(const [mod,names] of [[http,['request','get','createServer']],[https,['request','get','createServer']],[net,['connect','createConnection','createServer']],[tls,['connect','createServer']],[dns,['lookup','resolve','resolve4','resolve6']],[dgram,['createSocket']],[http2,['connect','createServer','createSecureServer']],[child,['exec','execFile','spawn','fork']]])for(const name of names)if(typeof mod[name]==='function')mod[name]=mark(name);
 globalThis.fetch=mark('fetch');syncBuiltinESMExports();
 const { scanProject }=await import('../../dist/src/node/index.js');
+const { runDoctor }=await import('../../dist/src/cli/doctor.js');
 const report=await scanProject({path:fileURLToPath(new URL('../fixtures/risky',import.meta.url))});
-const result=JSON.stringify({calls,status:report.status,findings:report.findings.length,secret:JSON.stringify(report).includes('AF_TEST_CANARY_9b1')});
+const doctor=runDoctor(true);
+const result=JSON.stringify({calls,status:report.status,findings:report.findings.length,secret:JSON.stringify(report).includes('AF_TEST_CANARY_9b1'),doctorExit:doctor.exitCode,doctorSupported:JSON.parse(doctor.output).runtimeSupported});
 if(process.argv[2])await writeFile(process.argv[2],result);else console.log(result);

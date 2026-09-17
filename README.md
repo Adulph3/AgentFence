@@ -159,7 +159,7 @@ npx @adulph3/agentfence@0.2.0 scan . --json --fail-on high > agentfence-report.j
 npx @adulph3/agentfence@0.2.0 scan . --output agentfence-report.json
 ```
 
-Reports are security artifacts even though raw paths and secret values are omitted. Store and share them accordingly.
+Reports are security artifacts even though raw paths and secret values are omitted. Store and share them accordingly. On POSIX systems, `--output` creates reports with mode `0600`. On Windows, confidentiality depends on the inherited ACL of the parent directory, so the operator must choose a suitably restricted parent directory. Mocked and lexical Windows tests do not prove inherited-ACL confidentiality on a real system.
 
 ## Understanding the report
 

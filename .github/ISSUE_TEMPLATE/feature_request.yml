@@ -1,0 +1,45 @@
+name: Feature request
+description: Propose a focused improvement to AgentFence's static audit scope or developer experience.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the observable configuration problem first. AgentFence will not add execution of scanned content, live MCP access, telemetry, or remote analysis.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What review or automation problem is difficult today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the desired static behavior, including relevant configuration fields or output.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Compatibility evidence
+      description: Link to official vendor documentation when proposing a new adapter or field interpretation.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Scope confirmation
+      options:
+        - label: This request can preserve no-execution, zero-runtime-network, read-only-default, deterministic, and safe-output behavior.
+          required: true

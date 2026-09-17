@@ -1,0 +1,79 @@
+name: Bug report
+description: Report a reproducible AgentFence problem without sharing private configuration.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Use synthetic inputs and do not paste credentials, private paths, raw reports, or unfixed security details. Report vulnerabilities through GitHub private vulnerability reporting.
+
+  - type: input
+    id: agentfence-version
+    attributes:
+      label: AgentFence version
+      placeholder: 0.2.0
+    validations:
+      required: true
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      description: Output of `node --version`.
+      placeholder: v24.21.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating system
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      description: Provide the exact AgentFence command after removing private paths or values.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include safe error codes or sanitized output only.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Synthetic reproduction
+      description: Provide the smallest synthetic configuration that reproduces the problem.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Data-safety confirmation
+      options:
+        - label: I removed credentials, private configuration, private paths, raw reports, and other sensitive data.
+          required: true

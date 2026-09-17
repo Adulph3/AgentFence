@@ -1,281 +1,180 @@
 <p align="center">
-  <img src="docs/assets/agentfence-banner.svg" alt="AgentFence — local-first security scanner for AI coding-agent environments" width="100%">
+  <img src="docs/assets/agentfence-banner.svg" alt="AgentFence — local-first security scanner for AI coding-agent configurations" width="100%">
 </p>
 
 <h1 align="center">AgentFence</h1>
 
 <p align="center">
-  <strong>Local-first security scanner for AI coding-agent environments.</strong><br>
-  Audit supported configuration and instruction files without executing the content you scan.
+  <strong>Audit AI coding-agent configuration before it becomes an attack surface.</strong><br>
+  A local-first, non-executing static scanner for agent instructions, MCP configuration, hooks, permissions, and exposed capabilities.
 </p>
 
 <p align="center">
+  <a href="https://www.npmjs.com/package/@adulph3/agentfence"><img alt="npm version" src="https://img.shields.io/npm/v/%40adulph3%2Fagentfence?color=CB3837&logo=npm"></a>
   <a href="https://github.com/Adulph3/AgentFence/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/Adulph3/AgentFence/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="https://github.com/Adulph3/AgentFence/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Adulph3/AgentFence?sort=semver"></a>
-  <a href="https://nodejs.org/"><img alt="Node.js 22 and 24" src="https://img.shields.io/badge/Node.js-22.x%20%7C%2024.x-339933?logo=node.js&logoColor=white"></a>
-  <a href="#installation"><img alt="Linux, macOS, and Windows" src="https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-2563EB"></a>
-  <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/license-MIT-0F766E"></a>
+  <a href="https://github.com/Adulph3/AgentFence/releases/latest"><img alt="GitHub release" src="https://img.shields.io/github/v/release/Adulph3/AgentFence?sort=semver"></a>
+  <a href="https://nodejs.org/"><img alt="Node.js 22 and 24" src="https://img.shields.io/badge/Node.js-22%20%7C%2024-339933?logo=node.js&logoColor=white"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-0F766E"></a>
 </p>
 
 <p align="center">
-  <a href="#quick-start"><strong>Quick Start</strong></a>
-  · <a href="#installation">Installation</a>
-  · <a href="#usage-examples">Usage examples</a>
-  · <a href="#security-model">Security</a>
+  <a href="#quick-start"><strong>Quick start</strong></a>
+  · <a href="#what-it-checks">Checks</a>
+  · <a href="#supported-ecosystem">Adapters</a>
+  · <a href="#security-model">Security model</a>
+  · <a href="#cli-reference">CLI</a>
 </p>
+
+```bash
+npx @adulph3/agentfence@0.2.0 scan .
+npx @adulph3/agentfence@0.2.0 doctor
+```
+
+No global installation is required. AgentFence v0.2.0 supports Node.js 22 and 24; Node.js 24 is recommended.
 
 > [!IMPORTANT]
-> AgentFence reports observable configuration exposure. It is not a sandbox, a runtime monitor, or a guarantee that an agent, repository, or machine is secure.
-
-## What is AgentFence?
-
-AgentFence is an offline static audit for supported AI coding-agent configuration and instruction files. It identifies review-worthy declarations—such as hooks, shell commands, MCP servers, credential-bearing environment references, broad filesystem roots, and unsafe instruction patterns—before you trust or run the surrounding tooling.
-
-The scanner uses fixed local discovery, bundled parsers, deterministic rules, and safe terminal or JSON reports. It does not start an agent, execute a hook, launch an MCP server, install a package, resolve a remote endpoint, or send scan data anywhere.
+> The official npm package is **`@adulph3/agentfence`**. The unscoped package `agentfence` is unrelated to this project.
 
 ## Why AgentFence?
 
-AI coding agents can read project instructions, load MCP configuration, inherit local capabilities, and invoke lifecycle hooks. Those configuration surfaces are useful, but they can be difficult to review across tools and scopes.
+AI coding tools can consume instructions and configuration that grant or request meaningful local capabilities: shell hooks, MCP servers, environment references, filesystem roots, approval modes, and project-level instructions. Reviewing each vendor format by hand is easy to skip and hard to compare.
 
-AgentFence gives developers one conservative view of the supported configuration that is present:
+AgentFence provides one conservative, deterministic view of the supported files that are present. It answers:
 
-- what agent ecosystem was detected;
-- which declared capabilities deserve review;
-- where the evidence exists through opaque source identifiers;
-- how findings affect an explainable score; and
-- whether coverage was complete, partial, or blocked.
+- Which agent configuration surfaces were found?
+- What capability or risky behavior is declared?
+- Which findings deserve review first?
+- Was the scan complete, partial, or unable to assess supported input?
+- How did each finding affect the observed-risk score?
 
-It describes declarations and requests—not intent, exploitability, live permissions, or compromise.
+AgentFence reports declarations and requests. It does not claim that a configuration is malicious, reachable, exploitable, or active at runtime.
 
-## Key features
+## What it checks
 
-| Capability | What AgentFence provides |
+| Area | Examples of observable risk |
 | --- | --- |
-| Cross-agent inspection | Fixed adapters for Codex, Claude Code, Cursor, Kiro, VS Code, and generic MCP configuration |
-| MCP analysis | Transport, launcher, package selector, environment binding, enabled-state, endpoint-class, and recognized filesystem-root observations |
-| Shell and supply-chain findings | Shell wrappers, elevation, recursive deletion, command composition, Git push automation, mutable package runners, and downloader-to-interpreter flows |
-| Secret-safe environment analysis | Detects curated credential-bearing names and literal credential configuration without emitting secret values |
-| Instruction and Unicode checks | Conservative instruction heuristics plus bidi and unusual control/format code-point detection |
-| Filesystem safety | Bounded discovery and reads, containment checks, no-follow link handling, and explicit partial-coverage reporting |
-| Deterministic results | Versioned rules and scoring with stable terminal and JSON output for identical complete inputs |
-| Local operation | No application-initiated network requests, telemetry, analytics, backend, remote AI, or live MCP access during `scan` or `doctor` |
-| Automation support | Safe JSON reports, threshold-based exits, severity filtering, and a fixed-surface `doctor` command |
+| Secrets | Credential-bearing environment bindings and non-empty literals in recognized sensitive fields |
+| Shell | Shell wrappers, elevation, recursive deletion, command composition, and Git push automation |
+| Supply chain | Mutable or temporary npm package runners and download-to-interpreter flows |
+| MCP | Local process servers, remote endpoints, transport, launcher, enablement, and dynamic construction |
+| Network | Plain HTTP MCP endpoints outside literal loopback addresses |
+| Filesystem | Broad roots passed through recognized filesystem-server schemas |
+| Permissions | Documented approval-bypass or broad auto-approval settings |
+| Instructions | Affirmative requests for credential access, safeguard bypass, data transmission, or risky automation |
+| Unicode | Bidirectional controls and unusual hidden format/control characters |
+| Capability combinations | Shell, network, and sensitive-environment capabilities declared for the same principal |
 
-See [detector coverage](docs/DETECTORS.md), [scoring](docs/SCORING.md), and the [threat model](docs/THREAT_MODEL.md) for the precise contracts.
+The executable catalog currently contains 23 versioned rules. See [detector coverage](docs/DETECTORS.md) for rule IDs, confidence boundaries, and intentional exclusions.
 
-## Supported ecosystems
+## Supported ecosystem
 
-| Ecosystem | Recognized configuration and instruction surfaces | Status |
-| --- | --- | :---: |
-| OpenAI Codex | `.codex/config.toml`, `AGENTS.md`, `AGENTS.override.md` | Supported |
-| Claude Code | `.claude/settings.json`, `.claude/settings.local.json`, `CLAUDE*.md`, `.claude/rules/*.md`, documented MCP and nested hook structures | Supported |
-| Cursor | `.cursor/mcp.json`, `.cursor/hooks.json`, `.cursor/rules/*.mdc`, legacy `.cursorrules` | Supported |
-| Kiro | `.kiro/settings/mcp.json`, `.kiro/hooks/*.json`, `.kiro/steering/*.md` | Supported |
-| VS Code | `.vscode/mcp.json`, `.vscode/settings.json` | Supported |
-| Generic MCP | `.mcp.json` universal transport, command/argv, URL, and environment semantics | Supported |
+These are configuration adapters, not vendor partnerships or endorsements.
 
-Support is intentionally narrow and versioned. Unknown security-relevant syntax becomes a coverage limitation rather than guessed semantics. User-level configuration is opt-in through `--user-configs` and a fixed allowlist; AgentFence never crawls an entire home directory. See the full [compatibility matrix](docs/COMPATIBILITY.md).
+| Adapter | Recognized project surfaces |
+| --- | --- |
+| Codex | `.codex/config.toml`, `AGENTS.md`, `AGENTS.override.md` |
+| Claude Code | `.claude/settings.json`, `.claude/settings.local.json`, `CLAUDE*.md`, `.claude/rules/*.md`, supported MCP and hook structures |
+| Cursor | `.cursor/mcp.json`, `.cursor/hooks.json`, `.cursor/rules/*.mdc`, legacy `.cursorrules` |
+| Kiro | `.kiro/settings/mcp.json`, `.kiro/hooks/*.json`, `.kiro/steering/*.md` |
+| VS Code | `.vscode/mcp.json`, `.vscode/settings.json` |
+| Generic MCP | Recognized `.mcp.json` transport, command/argv, URL, and environment fields |
+
+Support is intentionally narrow and versioned. Unknown security-relevant syntax becomes a coverage limitation instead of being assigned guessed semantics. `--user-configs` adds a fixed allowlist of supported Codex, Claude Code, Cursor, and Kiro locations; it does not crawl the home directory. See the [compatibility matrix](docs/COMPATIBILITY.md).
 
 ## Security model
 
-AgentFence treats repository files, configuration, instructions, hooks, commands, URLs, names, links, and parser failures as hostile data.
+Scanned content is hostile data, never authority.
 
-| Guarantee | Behavior |
+| Boundary | AgentFence behavior |
 | --- | --- |
-| No scanned-content execution | No agent, hook, command, package, or MCP server is launched |
-| No application network activity | `scan` and `doctor` do not initiate runtime network requests, update checks, uploads, or endpoint probes |
-| No telemetry | No analytics, backend, cloud account, remote AI, or usage collection |
-| Read-only by default | The scan reads bounded supported inputs; only explicit `--output` creates a new report file and it never overwrites an existing destination |
-| Secret-safe reporting | Reports omit raw paths, names, values, URLs, commands, headers, parser errors, and secret-derived hashes |
-| Explicit uncertainty | Unreadable, malformed, oversized, changing, or unsupported inputs produce partial coverage instead of a false clean result |
+| Execution | Does not launch agents, hooks, commands, packages, or MCP servers |
+| Network | `scan` and `doctor` make no application-initiated network requests, endpoint probes, uploads, or update checks |
+| Privacy | No telemetry, analytics, backend, cloud account, or remote AI |
+| Filesystem | Uses bounded discovery and reads; links, non-regular files, and observed containment failures are rejected |
+| Output | Omits raw values, commands, URLs, headers, parser errors, secret-derived hashes, and raw paths |
+| Writes | Read-only by default; `--output` exclusively creates a new report and never overwrites an existing file |
+| Uncertainty | Malformed, unreadable, oversized, changing, or unsupported inputs make coverage partial rather than falsely clean |
 
 ```mermaid
-flowchart LR
-    A["Known config & instruction files"] --> B["Bounded acquisition"]
-    B --> C["Bundled parsers & adapters"]
-    C --> D["Static rules & scoring"]
-    D --> E["Safe terminal / JSON report"]
+flowchart TD
+    A["Workspace + opt-in user config"] --> B["Fixed discovery"]
+    B --> C["Bounded acquisition"]
+    C --> D["Bundled parsing + adapters"]
+    D --> E["Versioned rules + scoring"]
+    E --> F["Safe terminal or JSON report"]
 ```
 
-**No execution · No application-initiated network requests · No telemetry**
+Raw bytes still exist briefly in process memory, and portable Node.js filesystem checks cannot prove containment against a concurrently hostile tree. For adversarial repositories, use an externally prepared immutable local snapshot. Read the complete [threat model](docs/THREAT_MODEL.md) and [privacy model](docs/PRIVACY.md).
 
-Raw source bytes still exist in process memory while being analyzed, and portable Node.js checks cannot prove containment against a concurrently hostile filesystem. For adversarial trees, scan an externally prepared immutable local snapshot. Read the complete [privacy model](docs/PRIVACY.md) and [threat model](docs/THREAT_MODEL.md).
+## Quick start
 
-## Quick Start
+### Requirements
 
-AgentFence v0.2.0 supports Node.js 22 and 24; Node.js 24 is recommended. Untested odd-numbered releases are not supported. Once the scoped package is published, use it for a one-off scan without a permanent installation:
+- Node.js 22 or 24
+- A local directory to inspect
+
+Scan the current directory without installing AgentFence globally:
 
 ```bash
-npx @adulph3/agentfence scan
-npx @adulph3/agentfence scan --user-configs
+npx @adulph3/agentfence@0.2.0 scan .
 ```
 
-The optional permanent installation keeps the executable name `agentfence`:
+Run the fixed-surface runtime and safety self-check:
 
 ```bash
-npm install -g @adulph3/agentfence
-agentfence scan
-agentfence scan --user-configs
+npx @adulph3/agentfence@0.2.0 doctor
 ```
 
-For an explicit package selection, `npx --package=@adulph3/agentfence agentfence scan` is equivalent. Verify the scoped package's publication before using these registry-backed commands. The unrelated unscoped npm package `agentfence` is **not this project**. npm/npx installation may contact the registry; AgentFence's `scan` and `doctor` commands make no application-initiated network requests.
+`npx` may contact the npm registry to obtain the package. Once running, AgentFence's `scan` and `doctor` commands do not initiate application network activity.
 
-## Installation
+## Common workflows
 
-The platform-specific steps below remain available for the separately verified v0.1.0 GitHub artifact. For v0.2.0, use the scoped npm commands in [Quick Start](#quick-start) after confirming publication.
-
-AgentFence v0.1.0 requires **Node.js 24.x** (`>=24 <25`). It is distributed through GitHub Releases and is **not published to the npm registry**. The commands below install the downloaded local `.tgz` artifact.
-
-Official artifact: [`agentfence-0.1.0.tgz`](https://github.com/Adulph3/AgentFence/releases/download/v0.1.0/agentfence-0.1.0.tgz)
-
-SHA-256:
-
-```text
-4d5271aad1a7f56f66555752d6a3184643cac0213a712079af33d95709db278b
-```
-
-<details open>
-<summary><strong>Linux</strong></summary>
-
-1. Install Node.js 24 using your preferred version manager or the [official Node.js download](https://nodejs.org/en/download), then verify the runtime:
-
-   ```bash
-   node --version
-   npm --version
-   ```
-
-   `node --version` must report `v24.x.x`.
-
-2. Download the official release artifact:
-
-   ```bash
-   curl -fLO https://github.com/Adulph3/AgentFence/releases/download/v0.1.0/agentfence-0.1.0.tgz
-   ```
-
-3. Verify the checksum:
-
-   ```bash
-   printf '%s  %s\n' \
-     '4d5271aad1a7f56f66555752d6a3184643cac0213a712079af33d95709db278b' \
-     'agentfence-0.1.0.tgz' | sha256sum --check
-   ```
-
-4. Install the local package and verify it:
-
-   ```bash
-   npm install -g ./agentfence-0.1.0.tgz
-   agentfence --version
-   agentfence doctor
-   ```
-
-</details>
-
-<details>
-<summary><strong>macOS</strong></summary>
-
-1. Install Node.js 24 using your preferred version manager or the [official Node.js download](https://nodejs.org/en/download), then verify the runtime:
-
-   ```bash
-   node --version
-   npm --version
-   ```
-
-   `node --version` must report `v24.x.x`.
-
-2. Download the official release artifact:
-
-   ```bash
-   curl -fLO https://github.com/Adulph3/AgentFence/releases/download/v0.1.0/agentfence-0.1.0.tgz
-   ```
-
-3. Verify the checksum:
-
-   ```bash
-   expected='4d5271aad1a7f56f66555752d6a3184643cac0213a712079af33d95709db278b'
-   actual="$(shasum -a 256 agentfence-0.1.0.tgz | awk '{print $1}')"
-   [ "$actual" = "$expected" ] || { echo 'Checksum mismatch' >&2; exit 1; }
-   ```
-
-4. Install the local package and verify it:
-
-   ```bash
-   npm install -g ./agentfence-0.1.0.tgz
-   agentfence --version
-   agentfence doctor
-   ```
-
-</details>
-
-<details>
-<summary><strong>Windows (PowerShell)</strong></summary>
-
-1. Install Node.js 24 from the [official Node.js download](https://nodejs.org/en/download). Open a new PowerShell window and verify the runtime:
-
-   ```powershell
-   node --version
-   npm --version
-   ```
-
-   `node --version` must report `v24.x.x`.
-
-2. Download the official release artifact:
-
-   ```powershell
-   Invoke-WebRequest `
-     -Uri "https://github.com/Adulph3/AgentFence/releases/download/v0.1.0/agentfence-0.1.0.tgz" `
-     -OutFile "agentfence-0.1.0.tgz"
-   ```
-
-3. Verify the checksum:
-
-   ```powershell
-   $expected = "4D5271AAD1A7F56F66555752D6A3184643CAC0213A712079AF33D95709DB278B"
-   $actual = (Get-FileHash .\agentfence-0.1.0.tgz -Algorithm SHA256).Hash
-   if ($actual -ne $expected) { throw "AgentFence checksum mismatch" }
-   ```
-
-4. Install the local package and verify it:
-
-   ```powershell
-   npm install -g .\agentfence-0.1.0.tgz
-   agentfence --version
-   agentfence doctor
-   ```
-
-   On Windows, `--output` files use the inherited ACL of the selected parent directory; operators must choose a suitably restricted parent directory. Mocked and lexical Windows tests do not validate real inherited-ACL confidentiality.
-
-</details>
-
-On POSIX systems, `--output` creates a new report with mode `0600`. On Windows, report confidentiality depends on the inherited ACL of the selected parent directory, which the operator must restrict appropriately; mocked or lexical Windows tests do not establish real ACL behavior.
-
-## Usage examples
-
-Run AgentFence from the project you want to inspect:
+### Scan another project
 
 ```bash
-agentfence scan .
+npx @adulph3/agentfence@0.2.0 scan ../another-project
 ```
 
-Common workflows:
+### Include supported user-level configuration
 
 ```bash
-# Safe JSON on stdout
-agentfence scan . --json
-
-# Create a new JSON report; existing files are never overwritten
-agentfence scan . --output report.json
-
-# Opt into the fixed allowlist of supported user configuration
-agentfence scan . --user-configs
-# Show High/Critical findings and fail when either is present
-agentfence scan . --severity high --fail-on high
-
-# Run fixed-surface runtime and self-test diagnostics
-agentfence doctor
-agentfence doctor --json
+npx @adulph3/agentfence@0.2.0 scan . --user-configs
 ```
 
-The default failure threshold is `high`. A complete scan exits `1` when an applicable High or Critical finding reaches that threshold.
+### Show only High and Critical findings
+
+```bash
+npx @adulph3/agentfence@0.2.0 scan . --severity high
+```
+
+### Produce JSON for CI or other tooling
+
+```bash
+npx @adulph3/agentfence@0.2.0 scan . --json --fail-on high > agentfence-report.json
+```
+
+### Create a report without overwriting an existing file
+
+```bash
+npx @adulph3/agentfence@0.2.0 scan . --output agentfence-report.json
+```
+
+Reports are security artifacts even though raw paths and secret values are omitted. Store and share them accordingly.
+
+## Understanding the report
+
+| Report element | Meaning |
+| --- | --- |
+| Coverage | How many eligible sources were analyzed and whether any input was skipped or unsupported |
+| Agents | Configuration ecosystems inferred from supported evidence; not proof that a tool is installed or active |
+| Findings | Versioned rule matches with severity, confidence, applicability, safe location, and remediation |
+| Score | `100 - capped deductions` under scoring model `1.0.0`; a summary of observed configuration risk |
+| Highest severity | The most severe finding, shown separately because one severe issue can coexist with a moderate score |
+| Errors | Fixed safe codes describing partial or fatal coverage without echoing raw parser/OS errors |
+
+A score of 100 means no negative finding was observed in successfully assessed supported input. It does **not** certify the repository, agent, or machine as secure. A partial scan has a provisional score, and a scan with no supported input has no score.
+
+See [scoring](docs/SCORING.md) for weights, caps, grouping, and worked examples. JSON output conforms to the bundled schemas in [`schemas/`](schemas/).
 
 ## CLI reference
 
@@ -283,134 +182,188 @@ The default failure threshold is `high`. A complete scan exits `1` when an appli
 
 | Command | Purpose |
 | --- | --- |
-| `agentfence scan [PATH]` | Scan a local directory; `PATH` defaults to the invocation directory |
-| `agentfence doctor` | Check Node.js support, fixed adapter metadata, and in-memory safety self-tests |
-| `agentfence --help` | Print command usage without scanning |
+| `agentfence scan [PATH]` | Scan a local directory; `PATH` defaults to the current directory |
+| `agentfence doctor [--json]` | Check runtime support, adapter metadata, and in-memory safety self-tests |
+| `agentfence --help` | Print usage without scanning |
 | `agentfence --version` | Print the installed version without scanning |
 
 ### Scan options
 
 | Option | Behavior |
 | --- | --- |
-| `--json` | Write the complete safe JSON report to stdout |
-| `--output PATH` | Create a new JSON report file; never overwrite an existing destination |
-| `--severity LEVEL` | Filter terminal presentation only; one of `info`, `low`, `medium`, `high`, `critical` |
-| `--fail-on LEVEL` | Set the exit threshold; one of `none`, `info`, `low`, `medium`, `high`, `critical` |
+| `--json` | Emit the complete safe JSON report to stdout |
+| `--output PATH` | Create a new JSON report; an existing destination is never overwritten |
+| `--severity LEVEL` | Filter terminal display: `info`, `low`, `medium`, `high`, or `critical` |
+| `--fail-on LEVEL` | Set the exit threshold: `none`, `info`, `low`, `medium`, `high`, or `critical` |
 | `--user-configs` | Add the fixed allowlist of supported user-level configuration |
-| `--no-color` | Disable terminal color; non-empty `NO_COLOR` is also honored |
+| `--no-color` | Disable color; a non-empty `NO_COLOR` is also honored |
 | `--` | End option parsing so a path beginning with `-` can be supplied |
 
-`--severity` never removes findings from JSON and never changes the score. `--fail-on none` disables finding-threshold failures, but partial, fatal, output, and interruption exits still take precedence. `--json --output PATH` is valid and writes only the file.
+`--severity` affects terminal presentation only; it never removes JSON findings or changes the score. The default failure threshold is `high`. `--fail-on none` disables finding-threshold failure, but partial, fatal, output, and interruption exits still apply.
 
-## Exit codes
+### Exit codes
 
 | Code | Meaning |
 | ---: | --- |
-| `0` | Complete scan below the configured threshold, or successful help/version/doctor |
+| `0` | Complete scan below the threshold, or successful help/version/doctor |
 | `1` | Complete scan with an applicable finding at or above `--fail-on` |
 | `2` | Invalid invocation/root, unsupported runtime, internal fatal error, or output failure |
-| `3` | Partial coverage; findings remain useful, but the score is provisional |
+| `3` | Partial coverage; known findings remain useful, but the score is provisional |
 | `130` | User interruption, unless an output failure takes precedence |
 
-Precedence is `2` → `130` → `3` → `1` → `0`. A partial result does not conceal known findings or become successful under `--fail-on none`.
+Precedence is `2` → `130` → `3` → `1` → `0`. CI should treat exit `3` as an incomplete assessment that requires review, not as a clean result.
 
-## CI and automation
+## Installation options
 
-Install the verified release artifact in your job, then use AgentFence as a threshold gate:
-
-```bash
-agentfence scan . --fail-on high
-```
-
-For machine-readable evidence:
+### One-off, version-pinned
 
 ```bash
-agentfence scan . --json --fail-on high > agentfence-report.json
+npx @adulph3/agentfence@0.2.0 scan .
 ```
 
-Treat exit `1` as a configured policy threshold, exit `3` as incomplete coverage requiring review, and exit `2` as a scanner/runtime failure. Reports can contain sensitive configuration observations even though secret values and raw paths are omitted; handle them as security artifacts.
+### Project development dependency
 
-The AgentFence repository's workflow is configured to run the complete quality-gate sequence on Ubuntu, macOS, and Windows with Node.js 22.23.2 and 24.21.0.
+```bash
+npm install --save-dev --save-exact @adulph3/agentfence@0.2.0
+npx agentfence scan .
+```
 
-## How AgentFence works
+### Global CLI
 
-1. **Discovery** — match only the fixed registry of supported project files and any explicitly enabled user allowlist.
-2. **Bounded acquisition** — enforce traversal, entry, file-size, total-byte, link, device, and containment checks.
-3. **Isolated parsing** — send bounded bytes to fixed bundled parser/analysis workers; raw buffers and syntax trees do not return to reporters.
-4. **Vendor normalization** — project documented Codex, Claude Code, Cursor, Kiro, VS Code, and MCP structures into typed facts.
-5. **Static analysis** — apply the versioned rule catalog without executing commands or resolving external state.
-6. **Deterministic scoring** — group and cap deductions under scoring model `1.0.0`; partial scores are marked provisional.
-7. **Safe reporting** — emit escaped terminal text or schema-validated JSON containing only safe projections.
+```bash
+npm install --global @adulph3/agentfence@0.2.0
+agentfence scan .
+```
 
-For implementation boundaries and public APIs, see [Architecture](docs/ARCHITECTURE.md).
+For reproducible security tooling, prefer an exact version. Confirm the package name includes the `@adulph3/` scope before installation.
+
+## How it works
+
+1. **Discovery** matches a fixed registry of supported project files and any explicitly enabled user allowlist.
+2. **Acquisition** applies traversal, byte, entry, depth, link, device, and containment limits.
+3. **Parsing** uses fixed bundled JSON, JSONC, TOML, and Markdown-aware workers; scanned content cannot select code to load.
+4. **Normalization** maps vendor-specific structures to typed facts without preserving raw secret-bearing values.
+5. **Analysis** applies a compiled, versioned rule catalog without executing or resolving external state.
+6. **Scoring** groups duplicate risk, applies confidence weights and category caps, and marks incomplete scores provisional.
+7. **Reporting** emits stable safe DTOs as terminal text or schema-validated JSON.
+
+```text
+src/cli          command and exit behavior
+src/discovery    fixed supported-file registry
+src/fs           bounded local acquisition and exclusive output
+src/parsers      guarded JSON/JSONC/TOML/Markdown parsing
+src/adapters     Codex, Claude Code, Cursor, Kiro, VS Code, MCP
+src/analysis     normalized shell, environment, path, instruction facts
+src/rules        compiled detector registry
+src/scoring      deterministic observed-risk model
+src/reporters    safe terminal and JSON output
+schemas          versioned machine-readable contracts
+```
+
+For dependency direction, raw/safe boundaries, and public APIs, read [Architecture](docs/ARCHITECTURE.md).
 
 ## Release integrity
 
-| Field | Verified value |
+The current stable release is [`v0.2.0`](https://github.com/Adulph3/AgentFence/releases/tag/v0.2.0), built from commit [`36d1a7f`](https://github.com/Adulph3/AgentFence/commit/36d1a7f4ad938b57f52db101ee84a77d891f489c).
+
+| Field | Value |
 | --- | --- |
-| Release | [`v0.1.0`](https://github.com/Adulph3/AgentFence/releases/tag/v0.1.0) |
-| Artifact | [`agentfence-0.1.0.tgz`](https://github.com/Adulph3/AgentFence/releases/download/v0.1.0/agentfence-0.1.0.tgz) |
-| SHA-256 | `4d5271aad1a7f56f66555752d6a3184643cac0213a712079af33d95709db278b` |
-| Required runtime | Node.js `>=24 <25` |
-| Distribution | GitHub Releases only; not the npm registry |
+| npm package | [`@adulph3/agentfence@0.2.0`](https://www.npmjs.com/package/@adulph3/agentfence/v/0.2.0) |
+| GitHub artifact | [`adulph3-agentfence-0.2.0.tgz`](https://github.com/Adulph3/AgentFence/releases/download/v0.2.0/adulph3-agentfence-0.2.0.tgz) |
+| Artifact SHA-256 | `ac7c7bbcedcb07b1a290229ec417a353ce006f88d1efbd81f3184ecb30bd7429` |
+| Runtime | Node.js 22 or 24 |
+| Hosted CI | Ubuntu, macOS, and Windows on Node.js 22 and 24 |
 
-Always verify the checksum before installing. The release artifact and its digest are also recorded on the [v0.1.0 release page](https://github.com/Adulph3/AgentFence/releases/tag/v0.1.0).
+Verify the downloaded GitHub artifact on Linux:
 
-## Project status
+```bash
+printf '%s  %s\n' \
+  'ac7c7bbcedcb07b1a290229ec417a353ce006f88d1efbd81f3184ecb30bd7429' \
+  'adulph3-agentfence-0.2.0.tgz' | sha256sum --check
+```
 
-| Check | Status |
-| --- | --- |
-| Previously verified GitHub release | v0.1.0 |
-| Ubuntu / Node.js 24 CI | Passed |
-| macOS / Node.js 24 CI | Passed |
-| Windows / Node.js 24 CI | Passed |
-| CodeQL default setup | [Passed](https://github.com/Adulph3/AgentFence/actions/runs/34972625363) |
-| Private vulnerability reporting | [Available](https://github.com/Adulph3/AgentFence/security/advisories/new) |
+On macOS, use `shasum -a 256`; on Windows, use `Get-FileHash -Algorithm SHA256`. Version-specific artifacts and checksums belong on [GitHub Releases](https://github.com/Adulph3/AgentFence/releases).
 
-The platform statuses above refer to the repository's verified Node.js 24 quality-gate run. They do not establish Windows inherited-ACL confidentiality for arbitrary operator-selected output directories.
+## Development
+
+```bash
+git clone https://github.com/Adulph3/AgentFence.git
+cd AgentFence
+npm ci --ignore-scripts
+npm run typecheck
+npm run lint
+npm test
+npm run test:coverage
+npm run build
+```
+
+Node.js 22 and 24 are supported. Use synthetic offline fixtures only. Changes to rules, adapters, dependencies, public schemas, or output safety require the focused checks described in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Limitations
 
-AgentFence is deliberately static and narrow. It does not:
+AgentFence is static analysis, not runtime enforcement. It does not:
 
-- prove that a configuration is safe, malicious, reachable, or exploitable;
-- monitor an agent after the scan;
-- inspect live agent permissions, trust prompts, processes, or MCP tool descriptions;
-- validate credentials, resolve environment values, query package provenance, or perform CVE lookup;
-- execute arbitrary hook scripts or fully interpret shell grammar;
-- scan Git history, arbitrary source code, an entire home directory, or unknown vendor formats;
-- fully contain a filesystem that another process is changing during the scan; or
-- guarantee memory zeroization for hostile bytes handled by JavaScript.
+- prove that an agent, repository, endpoint, package, or machine is secure;
+- observe live permissions, trust prompts, processes, or MCP tool descriptions;
+- validate credentials or read their environment values;
+- resolve DNS, test endpoint reachability, query CVEs, or verify package provenance;
+- fully interpret arbitrary shell languages or execute referenced hook scripts;
+- scan Git history, arbitrary application source code, or an entire home directory;
+- guarantee complete containment while another process mutates the scanned filesystem; or
+- guarantee memory zeroization for bytes handled by JavaScript.
 
-Version pinning reduces selector drift but does not prove package integrity. Instruction heuristics are conservative and can miss multilingual, encoded, indirect, quoted, fenced, or negated requests. Unknown or unsupported security-relevant structures are reported as coverage limitations where possible.
+English instruction heuristics can miss multilingual, encoded, indirect, quoted, fenced, or otherwise obfuscated requests. Unsupported formats and incomplete context remain explicit coverage limits.
 
-## Updating and uninstalling
+## FAQ
 
-For the scoped npm package, update or uninstall with:
+<details>
+<summary><strong>Does AgentFence modify my agent configuration?</strong></summary>
 
-```bash
-npm install -g @adulph3/agentfence@latest
-npm uninstall -g @adulph3/agentfence
-```
+No. Scans are read-only. Only `--output` writes, and it exclusively creates a new report file.
 
-For a GitHub Release artifact, download its `.tgz`, verify the published checksum, and install the local file:
+</details>
 
-```bash
-npm install -g ./agentfence-VERSION.tgz
-```
+<details>
+<summary><strong>Does it execute instructions, hooks, or MCP servers?</strong></summary>
 
-## Security reporting
+No. Those values are classified as hostile data and are never executed by the scanner.
 
-Do not post credentials, raw reports, private paths, or exploit payloads in public issues. Report suspected vulnerabilities through [GitHub private vulnerability reporting](https://github.com/Adulph3/AgentFence/security/advisories/new) and include only the minimum synthetic reproduction required.
+</details>
 
-See [SECURITY.md](SECURITY.md) for the supported scope and disclosure guidance.
+<details>
+<summary><strong>Does it upload my configuration?</strong></summary>
 
-## Contributing
+No. `scan` and `doctor` have no application backend, telemetry, remote AI, or application-initiated network requests.
 
-Contributions must preserve the no-execution, no-application-network, read-only-default, deterministic, and safe-output invariants. Use only synthetic offline fixtures, review every dependency, and run the documented quality gates before opening a pull request.
+</details>
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) before changing rules, adapters, dependencies, or public report behavior.
+<details>
+<summary><strong>Does zero findings mean the system is secure?</strong></summary>
+
+No. It means no finding was produced for successfully assessed supported input under the current rule set. Runtime behavior and unsupported surfaces remain outside that conclusion.
+
+</details>
+
+<details>
+<summary><strong>Can it run in CI?</strong></summary>
+
+Yes. Use `--fail-on` for a finding threshold, JSON for automation, and handle partial exit code `3` explicitly.
+
+</details>
+
+<details>
+<summary><strong>Why is the npm package scoped?</strong></summary>
+
+The unscoped npm name is owned by a different project. This repository publishes only as `@adulph3/agentfence`; the executable remains `agentfence` after installation.
+
+</details>
+
+## Security and contributing
+
+Do not paste credentials, private configuration, raw reports, private paths, or unfixed exploit details into public issues. Report vulnerabilities through [GitHub private vulnerability reporting](https://github.com/Adulph3/AgentFence/security/advisories/new) and read [SECURITY.md](SECURITY.md).
+
+Bug reports and focused pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and preserve the project's no-execution, zero-runtime-network, read-only-default, deterministic, and safe-output invariants.
 
 ## License
 
-AgentFence is released under the [MIT License](LICENSE).
+AgentFence is available under the [MIT License](LICENSE). Runtime dependency notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

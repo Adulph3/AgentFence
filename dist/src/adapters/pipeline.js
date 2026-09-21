@@ -54,8 +54,8 @@ function addShell(addFinding, errors, source, principal, app, agent, argv, capab
         addFinding(() => finding('AF-SHELL-005', 'shell', fact.push === 'force' ? 'high' : 'medium', 'high', loc, 'Git push automation is declared', 'Require review and explicit approval before publishing changes', app, [agent], context(principal, 'git-push-automation')));
     if (fact.supply) {
         if (fact.supply === 'mutable')
-            addFinding(() => finding('AF-SUPPLY-001', 'supply-chain', 'medium', 'high', loc, 'Mutable package execution selector is declared', 'Pin a direct package version', app, [agent], context(principal, 'mutable-package-selector')));
-        addFinding(() => finding('AF-SUPPLY-002', 'supply-chain', 'info', 'high', loc, 'Temporary package runner is declared', 'Prefer a reviewed installed dependency', app, [agent], context(principal, 'temporary-package-runner')));
+            addFinding(() => finding('AF-SUPPLY-001', 'supply-chain', 'medium', 'high', loc, 'Mutable package execution selector is declared', 'Pin the package runner to an exact reviewed version and verify its source before execution', app, [agent], context(principal, 'mutable-package-selector')));
+        addFinding(() => finding('AF-SUPPLY-002', 'supply-chain', 'info', 'high', loc, 'Temporary package runner is declared', 'Prefer a reviewed installed dependency; otherwise pin and review the temporary package', app, [agent], context(principal, 'temporary-package-runner')));
     }
     if (fact.remotePipe) {
         addFinding(() => finding('AF-SUPPLY-003', 'supply-chain', 'critical', 'high', loc, 'Download-to-interpreter flow is declared', 'Fetch and verify separately without streaming execution', app, [agent], context(principal, 'download-to-interpreter')));
@@ -103,7 +103,8 @@ export function analyzeStructuredSource(source, budget = { remaining: LIMITS.fin
                     if (env.credentialField && env.mode !== 'unknown')
                         capabilities.push(capability(source, declaration.principal, 'sensitive-env', app));
                 }
-                const launcher = declaration.command && /^(?:sh|bash|zsh|dash)(?:\.exe)?$/i.test(declaration.command.split(/[\\/]/).pop() ?? '') ? 'shell' : declaration.command && /^(?:npx|npm)(?:\.exe)?$/i.test(declaration.command.split(/[\\/]/).pop() ?? '') ? 'package-runner' : declaration.command ? 'direct' : 'unknown';
+                const commandName = (declaration.command?.split(/[\\/]/).pop() ?? '').toLowerCase().replace(/\.(?:exe|cmd|bat)$/, '');
+                const launcher = declaration.command && /^(?:sh|bash|zsh|dash)$/.test(commandName) ? 'shell' : declaration.command && (/^(?:npx|npm|uvx)$/.test(commandName) || (commandName === 'uv' && declaration.args[0] === 'tool' && declaration.args[1] === 'run')) ? 'package-runner' : declaration.command ? 'direct' : 'unknown';
                 // Structural ordinals must follow semantic de-duplication: repeating the same
                 // declared root cannot manufacture a second score group for one principal.
                 const rootCandidates = [...new Set(declaration.roots)], rootValues = rootCandidates.slice(0, 256);

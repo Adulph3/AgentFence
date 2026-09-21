@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "pinned-tool": {
+      "command": "npx",
+      "args": ["example-tool@1.2.3"]
+    },
+    "mutable-tool": {
+      "command": "uv",
+      "args": ["tool", "run", "example-tool"]
+    },
+    "local-http": {
+      "url": "http://127.0.0.1:8080/mcp"
+    }
+  }
+}

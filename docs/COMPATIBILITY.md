@@ -1,6 +1,6 @@
 # Compatibility
 
-AgentFence v0.2.0 recognizes Codex TOML; Claude Code settings/MCP/instructions; Cursor MCP/hooks/rules; Kiro MCP/hooks/steering; VS Code MCP/settings JSONC; and generic `.mcp.json`. Compatibility is based on the dated official links in the master plan (2026-09-10).
+AgentFence v0.2.0 with ruleset 1.1.0 recognizes Codex TOML; Claude Code settings/MCP/instructions; Cursor MCP/hooks/rules; Kiro MCP/hooks/steering; VS Code MCP/settings JSONC; and generic `.mcp.json`. Compatibility was reviewed against the dated official links on 2026-09-17.
 
 The published v0.2.0 package `@adulph3/agentfence` preserves the v0.1 detection scope and supports Node.js 22 and 24; Node 24 is recommended. Hosted CI passed on Ubuntu, macOS, and Windows with both supported Node majors. The previous v0.1.0 GitHub artifact remains Node-24-only. The binary remains `agentfence`; the unrelated unscoped npm package is not this project.
 
@@ -17,6 +17,18 @@ For Codex compatibility, documented credential-bearing Authorization/API-key hea
 forms are classified as a literal or environment reference but their raw header
 name and value are not retained. Unknown vendor fields remain unsupported rather
 than becoming generic semantics.
+
+Codex `env_vars` accepts documented string entries and `{ name, source }` records
+with `source` equal to `local` or `remote`, plus the legacy string map already
+supported by AgentFence. Duplicate safe names are collapsed. A declared
+`http_headers_helper` is not executed or copied into output; it emits the fixed
+`AF_CODEX_HTTP_HEADERS_HELPER_UNSUPPORTED` partial-coverage diagnostic.
+
+Package-runner analysis recognizes `npx`, `npm exec`, `uvx`, and `uv tool run`,
+including `.exe`, `.cmd`, and `.bat` command suffixes. Supported exact Python
+selectors are `name@x.y.z` and `name==x.y.z`; `--from` and `--with` selectors are
+included in mutability classification. Exact pinning reduces version drift but
+does not prove package integrity.
 
 The dated compatibility map is deliberately per-vendor: Codex accepts
 `mcp_servers.enabled` and top-level `approval_policy: "never"`; Claude Code reads

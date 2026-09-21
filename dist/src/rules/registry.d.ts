@@ -1,8 +1,8 @@
 import type { Category, Severity } from '../core/types.js';
-export declare const RULESET_VERSION: "1.0.0";
+export declare const RULESET_VERSION: "1.1.0";
 export interface RuleDefinition {
     readonly id: string;
-    readonly version: '1.0.0';
+    readonly version: string;
     readonly title: string;
     readonly category: Category;
     readonly defaultSeverity: Severity;

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "pinned-tool": {
+      "command": "uvx",
+      "args": ["example-tool==1.2.3"]
+    },
+    "reviewed-remote": {
+      "url": "https://example.invalid/mcp"
+    }
+  }
+}

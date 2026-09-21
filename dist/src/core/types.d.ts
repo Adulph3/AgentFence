@@ -114,7 +114,7 @@ export interface ScoreResult {
 export interface ScanReport {
     readonly schemaVersion: '1.0.0';
     readonly engineVersion: string;
-    readonly rulesetVersion: '1.0.0';
+    readonly rulesetVersion: '1.1.0';
     readonly kind: 'scan';
     readonly status: 'complete' | 'partial';
     readonly scope: {
@@ -157,7 +157,7 @@ export interface ScanFailure {
 export interface DoctorReport {
     readonly schemaVersion: '1.0.0';
     readonly engineVersion: string;
-    readonly rulesetVersion: '1.0.0';
+    readonly rulesetVersion: '1.1.0';
     readonly kind: 'doctor';
     readonly runtimeSupported: boolean;
     readonly platform: string;

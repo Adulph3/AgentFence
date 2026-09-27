@@ -4,19 +4,52 @@
   "description": "Offline static configuration exposure audit for local AI agents",
   "license": "MIT",
   "type": "module",
-  "engines": { "node": "^22.0.0 || ^24.0.0" },
-  "repository": { "type": "git", "url": "git+https://github.com/Adulph3/AgentFence.git" },
+  "engines": {
+    "node": "^22.0.0 || ^24.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Adulph3/AgentFence.git"
+  },
   "homepage": "https://github.com/Adulph3/AgentFence#readme",
-  "bugs": { "url": "https://github.com/Adulph3/AgentFence/issues" },
-  "keywords": ["ai-agent", "security", "scanner", "mcp", "codex", "claude-code", "cursor", "kiro"],
-  "publishConfig": { "access": "public" },
-  "bin": { "agentfence": "./dist/src/cli/main.js" },
+  "bugs": {
+    "url": "https://github.com/Adulph3/AgentFence/issues"
+  },
+  "keywords": [
+    "ai-agent",
+    "security",
+    "scanner",
+    "mcp",
+    "codex",
+    "claude-code",
+    "cursor",
+    "kiro"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "bin": {
+    "agentfence": "./dist/src/cli/main.js"
+  },
   "exports": {
     ".": "./dist/src/core/public.js",
-    "./core": { "types": "./dist/src/core/public.d.ts", "default": "./dist/src/core/public.js" },
-    "./node": { "types": "./dist/src/node/index.d.ts", "default": "./dist/src/node/index.js" }
+    "./core": {
+      "types": "./dist/src/core/public.d.ts",
+      "default": "./dist/src/core/public.js"
+    },
+    "./node": {
+      "types": "./dist/src/node/index.d.ts",
+      "default": "./dist/src/node/index.js"
+    }
   },
-  "files": ["dist", "schemas", "README.md", "LICENSE", "SECURITY.md", "THIRD_PARTY_NOTICES.md"],
+  "files": [
+    "dist",
+    "schemas",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "THIRD_PARTY_NOTICES.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/check-catalog-tests.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -33,7 +66,7 @@
   },
   "devDependencies": {
     "@types/node": "24.6.0",
-    "ajv": "8.17.1",
+    "ajv": "8.20.0",
     "typescript": "5.9.2"
   }
 }

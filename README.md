@@ -32,6 +32,8 @@ npx @adulph3/agentfence@0.2.0 doctor
 
 No global installation is required. AgentFence v0.2.0 supports Node.js 22 and 24; Node.js 24 is recommended.
 
+This development branch prepares v0.3.0 and ruleset 1.1.0. The pinned npm commands above install the current published v0.2.0 release; the v0.3 detector changes described below are available only when building this branch locally until publication.
+
 > [!IMPORTANT]
 > The official npm package is **`@adulph3/agentfence`**. The unscoped package `agentfence` is unrelated to this project.
 

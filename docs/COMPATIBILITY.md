@@ -1,6 +1,6 @@
 # Compatibility
 
-AgentFence v0.2.0 with ruleset 1.1.0 recognizes Codex TOML; Claude Code settings/MCP/instructions; Cursor MCP/hooks/rules; Kiro MCP/hooks/steering; VS Code MCP/settings JSONC; and generic `.mcp.json`. Compatibility was reviewed against the dated official links on 2026-09-17.
+The local v0.3.0 candidate with ruleset 1.1.0 recognizes Codex TOML; Claude Code settings/MCP/instructions; Cursor MCP/hooks/rules; Kiro MCP/hooks/steering; VS Code MCP/settings JSONC; and generic `.mcp.json`. Compatibility was reviewed against the dated official links on 2026-09-17.
 
 The published v0.2.0 package `@adulph3/agentfence` preserves the v0.1 detection scope and supports Node.js 22 and 24; Node 24 is recommended. Hosted CI passed on Ubuntu, macOS, and Windows with both supported Node majors. The previous v0.1.0 GitHub artifact remains Node-24-only. The binary remains `agentfence`; the unrelated unscoped npm package is not this project.
 

@@ -1,6 +1,6 @@
 {
   "name": "@adulph3/agentfence",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Offline static configuration exposure audit for local AI agents",
   "license": "MIT",
   "type": "module",

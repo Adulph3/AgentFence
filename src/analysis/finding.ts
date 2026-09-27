@@ -16,7 +16,7 @@ export function finding(ruleId:string, category:Category, severity:Severity, con
  const rule=ruleDefinition(ruleId);if(rule.category!==category)throw new Error('AF_RULE_CATEGORY');
  const principal=context.principalId??'source';
  const semantic=context.semanticFactKey??`location-${String(location.field??location.line??0)}`;
- const id=stableId('finding',ruleId,'1.0.0',location.sourceId,principal,semantic);
+ const id=stableId('finding',ruleId,rule.version,location.sourceId,principal,semantic);
  // Unicode IDs retain standard U+ notation. Only the public risk key replaces
  // that fixed token with its schema-safe structural spelling.
  const riskSemantic=semantic.startsWith('unicode:')?semantic.replace(':U+',':U'):semantic;

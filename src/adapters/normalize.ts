@@ -24,6 +24,10 @@ const unresolvedUrl=(value:string)=>/\$\{(?:env:|input:)[^}]+\}/.test(value);
 const validLiteralUrl=(value:string)=>{try{const url=new URL(value);return url.protocol==='http:'||url.protocol==='https:';}catch{return false;}};
 const credentialHeader=(name:string)=>/^(?:authorization|x-api-key|api-key)$/i.test(name);
 const appendHeaderFacts=(value:unknown,envFacts:EnvFact[],codexEnvReferences:boolean):boolean=>{const headers=obj(value);if(!headers)return false;let valid=true;for(const [name,headerValue] of Object.entries(headers)){if(typeof headerValue!=='string'){valid=false;continue;}if(!credentialHeader(name))continue;envFacts.push(codexEnvReferences?classifyEnvNameReference(headerValue,envFacts.length+1):classifyCredentialHeader(headerValue,envFacts.length+1));}return valid;};
+const appendCodexEnvVars=(value:unknown,envFacts:EnvFact[]):boolean=>{
+ if(Array.isArray(value)){let valid=true;const seen=new Set<string>();const append=(name:string)=>{if(seen.has(name))return;seen.add(name);envFacts.push(classifyEnvNameReference(name,envFacts.length+1));};for(const entry of value){if(typeof entry==='string'){append(entry);continue;}const record=obj(entry);if(!record||Object.keys(record).some(key=>key!=='name'&&key!=='source')||typeof record.name!=='string'||(record.source!=='local'&&record.source!=='remote')){valid=false;continue;}append(record.name);}return valid;}
+ const map=obj(value);if(!map)return false;let valid=true;for(const [name,binding] of Object.entries(map)){if(typeof binding==='string')envFacts.push(classifyEnvBinding(name,binding,envFacts.length+1));else valid=false;}return valid;
+};
 
 /** Independently validate documented fields. Untrusted map keys never leave this module. */
 export const emptyFacts=():McpFactsResult=>({recognized:false,envelopeValid:false,facts:[],diagnostics:[],hooks:[],approvals:[]});
@@ -47,7 +51,7 @@ export function mcpFacts(source:SourceRecord,parsed:unknown,options:McpOptions):
   const env=obj(server.env);if(server.env!==undefined&&!env)bad=true;
   const envFacts:EnvFact[]=[];
   if(env)for(const [name,binding] of Object.entries(env)){if(typeof binding!=='string'){bad=true;continue;}envFacts.push(classifyEnvBinding(name,binding,envFacts.length+1));}
-  if(options.codexExtras&&server.env_vars!==undefined){const names=strings(server.env_vars);if(names){const seenNames=new Set<string>();for(const name of names){if(seenNames.has(name))continue;seenNames.add(name);envFacts.push(classifyEnvNameReference(name,envFacts.length+1));}}else{const map=obj(server.env_vars);if(!map)bad=true;else for(const [name,binding] of Object.entries(map)){if(typeof binding==='string')envFacts.push(classifyEnvBinding(name,binding,envFacts.length+1));else bad=true;}}}
+  if(options.codexExtras&&server.env_vars!==undefined&&!appendCodexEnvVars(server.env_vars,envFacts))bad=true;
   if(options.codexExtras&&server.bearer_token_env_var!==undefined){if(typeof server.bearer_token_env_var==='string')envFacts.push(classifyEnvNameReference(server.bearer_token_env_var,envFacts.length+1));else bad=true;}
   if(options.codexExtras)for(const [headerField,envReferences] of [['headers',false],['http_headers',false],['env_http_headers',true]] as const)if(server[headerField]!==undefined&&!appendHeaderFacts(server[headerField],envFacts,envReferences))bad=true;
   const seenEnvFacts=new Set<string>();const deduplicatedEnvFacts=envFacts.filter(env=>{

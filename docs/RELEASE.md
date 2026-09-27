@@ -1,5 +1,7 @@
 # Release readiness
 
+The `feat/security-quality-v0.3` branch is a local v0.3.0 candidate with ruleset 1.1.0. It is not published. Before release, review its final package and hosted CI/CodeQL results, merge through branch protection, build from the reviewed release commit, then separately authorize the tag and publication. Do not publish a development tarball or reuse the v0.2.0 artifact checksum.
+
 v0.2.0 is the current stable [GitHub Release](https://github.com/Adulph3/AgentFence/releases/tag/v0.2.0) and npm package [`@adulph3/agentfence`](https://www.npmjs.com/package/@adulph3/agentfence/v/0.2.0). Its executable remains `agentfence`, and it supports Node.js 22 and 24. The unrelated unscoped npm package `agentfence` is not this project.
 
 The release commit is `36d1a7f4ad938b57f52db101ee84a77d891f489c`. The GitHub release artifact is `adulph3-agentfence-0.2.0.tgz` with SHA-256 `ac7c7bbcedcb07b1a290229ec417a353ce006f88d1efbd81f3184ecb30bd7429`. Hosted CI passed on Ubuntu, macOS, and Windows for Node.js 22 and 24, and CodeQL passed for the release.

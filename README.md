@@ -32,6 +32,8 @@ npx @adulph3/agentfence@0.2.0 doctor
 
 No global installation is required. AgentFence v0.2.0 supports Node.js 22 and 24; Node.js 24 is recommended.
 
+This development branch prepares v0.3.0 and ruleset 1.1.0. The pinned npm commands above install the current published v0.2.0 release; the v0.3 detector changes described below are available only when building this branch locally until publication.
+
 > [!IMPORTANT]
 > The official npm package is **`@adulph3/agentfence`**. The unscoped package `agentfence` is unrelated to this project.
 
@@ -55,7 +57,7 @@ AgentFence reports declarations and requests. It does not claim that a configura
 | --- | --- |
 | Secrets | Credential-bearing environment bindings and non-empty literals in recognized sensitive fields |
 | Shell | Shell wrappers, elevation, recursive deletion, command composition, and Git push automation |
-| Supply chain | Mutable or temporary npm package runners and download-to-interpreter flows |
+| Supply chain | Mutable or temporary npm/Python package runners (`npx`, `npm exec`, `uvx`, `uv tool run`) and download-to-interpreter flows |
 | MCP | Local process servers, remote endpoints, transport, launcher, enablement, and dynamic construction |
 | Network | Plain HTTP MCP endpoints outside literal loopback addresses |
 | Filesystem | Broad roots passed through recognized filesystem-server schemas |
@@ -175,6 +177,19 @@ Reports are security artifacts even though raw paths and secret values are omitt
 A score of 100 means no negative finding was observed in successfully assessed supported input. It does **not** certify the repository, agent, or machine as secure. A partial scan has a provisional score, and a scan with no supported input has no score.
 
 See [scoring](docs/SCORING.md) for weights, caps, grouping, and worked examples. JSON output conforms to the bundled schemas in [`schemas/`](schemas/).
+
+## Student security lab
+
+The synthetic [`examples/`](examples/) corpus contains vulnerable, safe, and mixed configurations. Build locally, predict the findings, scan each directory, then copy and harden the vulnerable configuration before scanning it again:
+
+```bash
+npm run build
+node dist/src/cli/main.js scan examples/vulnerable
+node dist/src/cli/main.js scan examples/safe
+node dist/src/cli/main.js scan examples/mixed
+```
+
+Nothing in the corpus is executed, downloaded, or contacted. The safe example may retain informational inventory findings; a score of 100 is not a security guarantee. See the [lab guide](examples/README.md) and the [security gap register](docs/SECURITY_GAPS.md).
 
 ## CLI reference
 

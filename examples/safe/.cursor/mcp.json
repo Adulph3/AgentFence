@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "reviewed-local": {
+      "command": "node",
+      "args": ["./tools/reviewed-server.mjs"],
+      "disabled": false,
+      "autoApprove": false
+    }
+  }
+}

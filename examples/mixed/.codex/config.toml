@@ -1,0 +1,9 @@
+approval_policy = "on-request"
+
+[mcp_servers.reviewed]
+command = "uvx"
+args = ["example-tool==1.2.3"]
+enabled = true
+env_vars = [
+  { name = "GITHUB_TOKEN", source = "local" }
+]

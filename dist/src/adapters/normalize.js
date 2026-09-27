@@ -23,6 +23,38 @@ const appendHeaderFacts = (value, envFacts, codexEnvReferences) => { const heade
         continue;
     envFacts.push(codexEnvReferences ? classifyEnvNameReference(headerValue, envFacts.length + 1) : classifyCredentialHeader(headerValue, envFacts.length + 1));
 } return valid; };
+const appendCodexEnvVars = (value, envFacts) => {
+    if (Array.isArray(value)) {
+        let valid = true;
+        const seen = new Set();
+        const append = (name) => { if (seen.has(name))
+            return; seen.add(name); envFacts.push(classifyEnvNameReference(name, envFacts.length + 1)); };
+        for (const entry of value) {
+            if (typeof entry === 'string') {
+                append(entry);
+                continue;
+            }
+            const record = obj(entry);
+            if (!record || Object.keys(record).some(key => key !== 'name' && key !== 'source') || typeof record.name !== 'string' || (record.source !== 'local' && record.source !== 'remote')) {
+                valid = false;
+                continue;
+            }
+            append(record.name);
+        }
+        return valid;
+    }
+    const map = obj(value);
+    if (!map)
+        return false;
+    let valid = true;
+    for (const [name, binding] of Object.entries(map)) {
+        if (typeof binding === 'string')
+            envFacts.push(classifyEnvBinding(name, binding, envFacts.length + 1));
+        else
+            valid = false;
+    }
+    return valid;
+};
 /** Independently validate documented fields. Untrusted map keys never leave this module. */
 export const emptyFacts = () => ({ recognized: false, envelopeValid: false, facts: [], diagnostics: [], hooks: [], approvals: [] });
 /**
@@ -75,30 +107,8 @@ export function mcpFacts(source, parsed, options) {
                 }
                 envFacts.push(classifyEnvBinding(name, binding, envFacts.length + 1));
             }
-        if (options.codexExtras && server.env_vars !== undefined) {
-            const names = strings(server.env_vars);
-            if (names) {
-                const seenNames = new Set();
-                for (const name of names) {
-                    if (seenNames.has(name))
-                        continue;
-                    seenNames.add(name);
-                    envFacts.push(classifyEnvNameReference(name, envFacts.length + 1));
-                }
-            }
-            else {
-                const map = obj(server.env_vars);
-                if (!map)
-                    bad = true;
-                else
-                    for (const [name, binding] of Object.entries(map)) {
-                        if (typeof binding === 'string')
-                            envFacts.push(classifyEnvBinding(name, binding, envFacts.length + 1));
-                        else
-                            bad = true;
-                    }
-            }
-        }
+        if (options.codexExtras && server.env_vars !== undefined && !appendCodexEnvVars(server.env_vars, envFacts))
+            bad = true;
         if (options.codexExtras && server.bearer_token_env_var !== undefined) {
             if (typeof server.bearer_token_env_var === 'string')
                 envFacts.push(classifyEnvNameReference(server.bearer_token_env_var, envFacts.length + 1));

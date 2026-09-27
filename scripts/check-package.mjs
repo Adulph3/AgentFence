@@ -10,7 +10,7 @@ const requiredFiles=new Set(['dist','schemas','README.md','LICENSE','SECURITY.md
 
 export function validatePackageMetadata(packageMetadata=pkg,lockMetadata=lock){
   const root=lockMetadata.packages?.[''];
-  if(packageMetadata.name!=='@adulph3/agentfence'||packageMetadata.version!=='0.2.0'||packageMetadata.private===true)throw new Error('package name, version, or public state invalid');
+  if(packageMetadata.name!=='@adulph3/agentfence'||packageMetadata.version!=='0.3.0'||packageMetadata.private===true)throw new Error('package name, version, or public state invalid');
   if(packageMetadata.license!=='MIT')throw new Error('package license must be MIT');
   if(lockMetadata.name!==packageMetadata.name||lockMetadata.version!==packageMetadata.version||!root||root.name!==packageMetadata.name||root.version!==packageMetadata.version||root.license!==packageMetadata.license||root.engines?.node!==packageMetadata.engines?.node||root.bin?.agentfence!=='dist/src/cli/main.js')throw new Error('package and lock root metadata disagree');
   if(packageMetadata.engines?.node!=='^22.0.0 || ^24.0.0'||packageMetadata.bin?.agentfence!=='./dist/src/cli/main.js')throw new Error('runtime or CLI metadata invalid');

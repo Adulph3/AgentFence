@@ -1,0 +1,15 @@
+# Security gap register
+
+This register records known limits after the v0.3 detection-quality work. A non-blocking gap is still important; it means the scanner must describe its supported scope honestly.
+
+| Gap | Why it exists | Impact | Release blocker? | Evidence that would close it |
+| --- | --- | --- | --- | --- |
+| PowerShell and `cmd` command semantics | AgentFence does not yet bundle a bounded parser for these grammars. | Relevant declarations produce `AF_SHELL_UNSUPPORTED` and a partial scan instead of detailed command findings. | No; coverage is explicit. | A bounded, non-executing grammar with positive, negative, adversarial, redaction, and Windows-hosted tests. |
+| Codex `http_headers_helper` semantics | The helper can generate headers dynamically and its output cannot be known safely through static configuration analysis. | Presence produces `AF_CODEX_HTTP_HEADERS_HELPER_UNSUPPORTED`; the helper command is never executed or reported. | No; coverage is explicit. | Official stable semantics plus a static representation that does not execute the helper or expose raw values. |
+| Arbitrary shell grammar | The tokenizer intentionally covers a small fixed POSIX subset. | Complex unsupported constructs may make the scan partial rather than yield detailed findings. | No. | Bounded parser expansion with near-miss and resource-exhaustion tests. |
+| Syscall-level denied-network proof | Unit and integration probes instrument Node networking APIs but do not trace every operating-system syscall. | Evidence supports application-level behavior, not a compromised runtime or native dependency. | No. | Reproducible Linux sandbox/trace evidence and equivalent supported-platform evidence. |
+| Windows output ACL confidentiality | Portable Node APIs create the file but cannot prove arbitrary inherited ACL confidentiality. | Operators must choose a restricted parent directory. | No. | Tests on real supported Windows hosts covering inherited ACL outcomes. |
+| Concurrent hostile filesystem | Portable checks reduce links, devices, cross-device traversal, and file-change races but are not an OS sandbox. | A same-user attacker mutating the tree during a scan remains outside the strongest guarantee. | No. | Scanning an externally prepared immutable snapshot or platform isolation with documented evidence. |
+| Unknown vendor fields and future formats | Vendor schemas evolve and AgentFence refuses to guess semantics. | Unsupported security-relevant shapes become partial coverage; they are not silently considered safe. | No. | Dated official documentation, adapter implementation, fixtures, and hosted compatibility tests. |
+| SARIF output | Safe location and metadata mapping needs a dedicated design and validation pass. | Findings are currently terminal/JSON only. | No. | Correct schema mapping, path-safety review, GitHub ingestion test, and no sensitive location leakage. |
+| First-party GitHub Action | A wrapper is useful only after the CLI contract and SARIF decision remain stable. | Users must invoke the CLI directly in CI. | No. | A minimal wrapper that delegates all detection to the CLI and passes cross-platform tests. |

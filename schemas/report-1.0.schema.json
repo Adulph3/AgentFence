@@ -120,7 +120,7 @@
       "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
     },
     "rulesetVersion": {
-      "const": "1.0.0"
+      "const": "1.1.0"
     },
     "kind": {
       "const": "scan"
@@ -546,7 +546,8 @@
             "pattern": "^AF-[A-Z-]+-[0-9]{3}$"
           },
           "ruleVersion": {
-            "const": "1.0.0"
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
           },
           "title": {
             "$ref": "#/$defs/safe"

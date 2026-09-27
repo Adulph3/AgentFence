@@ -1,16 +1,21 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { resolve } from 'node:path';
 import test from 'node:test';
 import pkg from '../../package.json' with {type:'json'};
 import lock from '../../package-lock.json' with {type:'json'};
 import { validatePackageMetadata } from '../../scripts/check-package.mjs';
+import { doctorReport } from '../../dist/src/cli/doctor.js';
+import { scanProject } from '../../dist/src/node/index.js';
+import { jsonFailure } from '../../dist/src/reporters/json.js';
 
 const root=new URL('../..',import.meta.url);
 
 test('public-ready package metadata is MIT, locked, and retains the release allowlist',()=>{
   assert.notEqual(pkg.private,true);
   assert.equal(pkg.name,'@adulph3/agentfence');
-  assert.equal(pkg.version,'0.2.0');
+  assert.equal(pkg.version,'0.3.0');
   assert.equal(lock.name,pkg.name);
   assert.equal(pkg.license,'MIT');
   assert.equal(lock.packages[''].license,'MIT');
@@ -24,6 +29,15 @@ test('public-ready package metadata is MIT, locked, and retains the release allo
   assert.throws(()=>validatePackageMetadata({...pkg,license:'Apache-2.0'},lock),/license/);
   assert.throws(()=>validatePackageMetadata(pkg,{...lock,packages:{...lock.packages,'':{...lock.packages[''],license:'Apache-2.0'}}}),/metadata disagree/);
   assert.throws(()=>validatePackageMetadata({...pkg,files:pkg.files.filter(file=>file!=='LICENSE')},lock),/allowlist/);
+});
+
+test('CLI and all public report kinds identify the locked package version',async()=>{
+  const version=spawnSync(process.execPath,['dist/src/cli/main.js','--version'],{encoding:'utf8'});
+  assert.equal(version.status,0);
+  assert.equal(version.stdout.trim(),pkg.version);
+  assert.equal(doctorReport().engineVersion,pkg.version);
+  assert.equal(JSON.parse(jsonFailure('AF_ROOT_INVALID')).engineVersion,pkg.version);
+  assert.equal((await scanProject({path:resolve('test/fixtures/clean')})).engineVersion,pkg.version);
 });
 
 test('Batch 8 consumer documentation states the Windows inherited-ACL limit',async()=>{

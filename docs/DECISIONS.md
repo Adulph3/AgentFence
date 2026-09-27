@@ -2,6 +2,9 @@
 
 - D01–D18 in the master plan are adopted unchanged.
 - Runtime dependencies are restricted to `@iarna/toml` 2.2.5 and `jsonc-parser` 3.3.1. Development tooling is exact-pinned and lifecycle scripts are ignored during installation.
+- The v0.3 preparation keeps engine/package version 0.2.0 and advances only the detector ruleset to 1.1.0. `AF-SUPPLY-001/002` advance to rule version 1.1.0 for uv runner coverage; unchanged rules retain 1.0.0 so finding identity reflects actual rule semantics.
+- `uvx` and `uv tool run` are recognized using bounded argv classification. AgentFence never resolves or executes the package. PowerShell, `cmd`, and Codex `http_headers_helper` remain explicit partial coverage instead of guessed semantics.
+- SARIF and a first-party GitHub Action are deferred until safe location mapping and a minimal wrapper have dedicated validation. Detection logic remains CLI/core-owned.
 - D19: the rule catalog is compiled into the package. Rule identifiers alone are
   insufficient because callers must not own public title/version/remediation/link
   strings. Only registry-owned bundled HTTPS origins are permitted.
